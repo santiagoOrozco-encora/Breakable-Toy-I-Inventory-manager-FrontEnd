@@ -1,5 +1,4 @@
 # Breakable-Toy-I-Inventory-manager
-Breakable toy I, Inventory manager
 
 # Description
 This project is part of the spark program assignments, the objective is to develop a functional store manager, with CRUD functionalities,

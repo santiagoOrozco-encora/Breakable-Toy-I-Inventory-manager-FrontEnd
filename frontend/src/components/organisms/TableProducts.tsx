@@ -1,9 +1,11 @@
-import { FunctionComponent, useState } from "react"
+import { FunctionComponent, useContext, useState } from "react"
 import TableComponent, { Product } from "../atoms/TableComponent"
 import Modal from "react-modal";
 import Button from "../atoms/Button";
 import InputField from "../atoms/InputField";
 import SelectField from "../atoms/SelectField";
+import { useForm } from "react-hook-form";
+import { ProductCategoryContext, ProductListContext } from "../../App";
 
 
 interface TableProductsProps{
@@ -25,7 +27,10 @@ const customStyles = {
 
 const TableProducts:FunctionComponent<TableProductsProps> = ({products}) =>{
 
+    const categoryProducts = useContext(ProductCategoryContext);
+    const productList = useContext(ProductListContext);
     const [showModal,setShowModal] = useState(false);
+    const {register,handleSubmit} = useForm();
 
     const openModal =() =>{
         setShowModal(true);
@@ -33,6 +38,35 @@ const TableProducts:FunctionComponent<TableProductsProps> = ({products}) =>{
     const closeModal = () => {
       setShowModal(false);
     };
+
+    const onSubmit = handleSubmit((async data=>{
+      try{
+        console.log(JSON.stringify(data))
+        const res = await fetch(`http://localhost:9090/api/v1/product`,{
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+      if(res.ok){
+         fetch("http://localhost:9090/api/v1/product")
+           .then((response) => response.json())
+           .then((data) => {
+             productList?.[1](data);
+             const categories: string[] = Array.from(
+               new Set(
+                 data.map((product: { category: Product }) => product.category)
+               )
+             );
+             categoryProducts?.[1](categories);
+           });
+      }
+      
+      console.log(data);
+    }catch(error){
+
+    }
+  }))
+    
 
     return (
       <div className="w-9/12 m-10 flex justify-center flex-col gap-3">
@@ -51,7 +85,7 @@ const TableProducts:FunctionComponent<TableProductsProps> = ({products}) =>{
         ></TableComponent>
 
         {/* Add product modal */}
-        <Modal
+        {/* <Modal
           isOpen={showModal}
           onRequestClose={closeModal}
           contentLabel="Add product"
@@ -59,7 +93,7 @@ const TableProducts:FunctionComponent<TableProductsProps> = ({products}) =>{
         >
           <div className="gap-3 flex flex-col">
             <h3 className="text-xl font-semibold">Add a new product</h3>
-            <form action="" className="gap-2.5 flex flex-col ">
+            <form onSubmit={onSubmit} className="gap-2.5 flex flex-col ">
               <InputField
                 type={"text"}
                 field={"productName"}
@@ -93,7 +127,7 @@ const TableProducts:FunctionComponent<TableProductsProps> = ({products}) =>{
               </div>
             </form>
           </div>
-        </Modal>
+        </Modal> */}
 
         {/* Edit product modal */}
         <Modal
@@ -104,29 +138,40 @@ const TableProducts:FunctionComponent<TableProductsProps> = ({products}) =>{
         >
           <div className="gap-3 flex flex-col">
             <h3 className="text-xl font-semibold">Add a new product</h3>
-            <form action="" className="gap-2.5 flex flex-col ">
+            <form action="" className="gap-2.5 flex flex-col " onSubmit={onSubmit}>
               <InputField
+                {...register("name", { required: true })}
                 type={"text"}
                 field={"productName"}
                 placeholder={"Milk, Beef, ..."}
                 label={"Product name"}
               />
               <SelectField
+                {...register("category", { required: true })}
                 optionName={"category"}
-                options={[]}
+                options={categoryProducts?.[0]}
                 label={"Product category"}
               ></SelectField>
               <InputField
+                {...register("stock", { required: true })}
                 type={"number"}
                 field={"stock"}
                 placeholder={"5"}
                 label={"Product stock"}
               />
               <InputField
+                {...register("unitPrice", { required: true })}
                 type={"number"}
                 field={"price"}
                 placeholder={"$32.5"}
                 label={"Product price"}
+              />
+              <InputField
+                {...register("expirationDate", { required: true })}
+                type={"date"}
+                field={"expirationDate"}
+                placeholder={"25-05-2025"}
+                label={"Expiration date"}
               />
               <div className="flex justify-end gap-3">
                 <Button variant={"secondary"} onClick={closeModal}>

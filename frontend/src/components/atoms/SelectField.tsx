@@ -2,13 +2,13 @@ import { FunctionComponent, HTMLAttributes } from "react";
 
 
 
-interface SelectFieldProps extends HTMLAttributes<SelectFieldProps>{
+interface SelectFieldProps extends HTMLAttributes<HTMLSelectElement>{
     optionName: string,
     options?: string[]
     label:string
 }
 
-const SelectField: FunctionComponent<SelectFieldProps> = ({optionName,options,children,label}) => {
+const SelectField: FunctionComponent<SelectFieldProps> = ({optionName,options,children,label,...rest}) => {
 
     return (
       <div className="flex flex-col gap-1 items-start w-full">
@@ -21,6 +21,7 @@ const SelectField: FunctionComponent<SelectFieldProps> = ({optionName,options,ch
         <select
           className="w-full border-b p-2 gap-0 text-base text-gray-500"
           id={optionName + "_select"}
+          {...rest}
         >
           <option value="" key="defaul">
             {children}
@@ -39,7 +40,7 @@ const SelectField: FunctionComponent<SelectFieldProps> = ({optionName,options,ch
                 <option key={'2'} value={2}>
                     {'Out of stock'}
                 </option>
-                <option key={'3'} value={''}>
+                <option key={'3'} value={3}>
                     {'All'}
                 </option>
             </>

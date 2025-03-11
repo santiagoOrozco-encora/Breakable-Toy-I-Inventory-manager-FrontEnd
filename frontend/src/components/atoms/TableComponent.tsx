@@ -13,7 +13,7 @@ import Checkbox from "../atoms/Checkbox";
 import Button from "../atoms/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrashAlt, faPenToSquare } from "@fortawesome/free-regular-svg-icons";
-import { ProductListContext } from "../../App";
+import { PaginationContext, ProductListContext } from "../../App";
 
 interface TableComponentProps extends HTMLAttributes<HTMLTableElement>{
     data: Product[]
@@ -34,6 +34,8 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
       pageIndex: 0,
       pageSize: 10,
     });
+  const paginationRow = useContext(PaginationContext);
+  console.log(paginationRow?.[0]);
     const [sorting, setSorting] = useState<SortingState>([]); 
         const columns = useMemo<ColumnDef<Product>[]>(
           () => [
@@ -112,7 +114,9 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
           data,
           columns,
           getCoreRowModel: getCoreRowModel(),
-          getPaginationRowModel: getPaginationRowModel(),
+          manualPagination:true,
+          rowCount:paginationRow?.[0],
+          //getPaginationRowModel: getPaginationRowModel(),
           onPaginationChange: setPagination,
           getSortedRowModel: getSortedRowModel(),
           onSortingChange:setSorting,

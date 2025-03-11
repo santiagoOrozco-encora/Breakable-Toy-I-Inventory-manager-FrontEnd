@@ -6,12 +6,17 @@ import TableProducts from './components/organisms/TableProducts';
 import { Product } from './components/atoms/TableComponent';
 
 type ProductListContextType = [
-  Product[],
-  React.Dispatch<React.SetStateAction<Product[]>>,
+   Product[],
+   React.Dispatch<React.SetStateAction<Product[]>>,
 ];
 type ProductCategoryContextType = [
   string[],
   React.Dispatch<React.SetStateAction<string[]>>,
+];
+
+type PaginationContextType = [
+  number,
+  React.Dispatch<React.SetStateAction<number>>,
 ];
 
 
@@ -20,39 +25,49 @@ export const ProductListContext = createContext<ProductListContextType | undefin
 );
 
 export const ProductCategoryContext = createContext<ProductCategoryContextType | undefined>(undefined);
+export const PaginationContext = createContext<PaginationContextType | undefined>(undefined);
 
 
 function ProductManager() {
 
   const [productData, setProductData] = useState<Product[]>([]);
   const [productCategory, setproductCategory] = useState<string[]>([]);
+  const [pagination,setPagination] = useState<number>(0);
 
   useEffect(()=>{
     fetch("http://localhost:9090/api/v1/product")
       .then((response) => response.json())
-      .then((data) => setProductData(data));
+      .then((data) => {
+        setProductData(data)
+        const categories:string[] = Array.from(
+        new Set(data.map((product: { category: Product; }) => product.category)));
+      setproductCategory(categories);
+    }
+
+      
+    );
       
 
   },[]);
 
-  useEffect(() => {
-    if (productData.length > 0) {
-      const categories = Array.from(
-        new Set(productData.map((product) => product.category))
-      );
-      setproductCategory(categories);
-    }
-  }, [productData]);
+  useEffect(()=>{
+    setPagination(productData.length);
+  },[productData]);
+
   return (
     <>
       <ProductListContext.Provider value={[productData, setProductData]}>
-        <ProductCategoryContext.Provider value={[productCategory,setproductCategory]}>
+        <ProductCategoryContext.Provider
+          value={[productCategory, setproductCategory]}
+        >
           <Header />
+          <PaginationContext.Provider value={[pagination,setPagination]}>
+            <main className="w-full m-10 flex justify-center">
+              <TableProducts products={productData || []} />
+              <Metrics />
+            </main>
+          </PaginationContext.Provider>
         </ProductCategoryContext.Provider>
-        <main className="w-full m-10 flex justify-center">
-          <TableProducts products={productData || []} />
-          <Metrics />
-        </main>
       </ProductListContext.Provider>
     </>
   );

@@ -2,8 +2,7 @@ import { FunctionComponent, HTMLAttributes } from "react";
 import { twMerge } from "tailwind-merge";
 
 interface ButtonProps extends HTMLAttributes<HTMLButtonElement>{
-    variant: 'primary'|'secondary'|'alt';
-
+    variant: 'primary'|'secondary'|'alt',
 }
 
 const BTNVARIANT ={
@@ -12,12 +11,23 @@ const BTNVARIANT ={
     alt: 'h-fit,rounded-md, border-gray-300 tansition-all hover:font-semibold '
 }
 
-const Button: FunctionComponent<ButtonProps> = ({children,variant,...rest}) =>{
+const Button: FunctionComponent<ButtonProps> = ({
+  children,
+  variant,
+  ...rest
+}) => {
+  const btnStyle = BTNVARIANT[variant];
 
-    const btnStyle = BTNVARIANT[variant];
-
-    return (<button {...rest} className={twMerge('hover:cursor-pointer',btnStyle)}>{children}</button>);
-}
+  return (
+    <button
+      disabled
+      className={twMerge("hover:cursor-pointer", btnStyle)}
+      {...rest}
+    >
+      {children}
+    </button>
+  );
+};
 
 export default Button;
 

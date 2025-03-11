@@ -5,7 +5,7 @@ import Button from "../atoms/Button";
 import InputField from "../atoms/InputField";
 import SelectField from "../atoms/SelectField";
 import { useForm } from "react-hook-form";
-import { ProductCategoryContext, ProductListContext } from "../../App";
+import { PaginationContext, ProductCategoryContext, ProductListContext } from "../../App";
 
 
 interface TableProductsProps{
@@ -28,6 +28,7 @@ const customStyles = {
 const TableProducts:FunctionComponent<TableProductsProps> = ({products}) =>{
 
     const categoryProducts = useContext(ProductCategoryContext);
+    const pagination = useContext(PaginationContext);
     const productList = useContext(ProductListContext);
     const [showModal,setShowModal] = useState(false);
     const {register,handleSubmit} = useForm();
@@ -51,14 +52,16 @@ const TableProducts:FunctionComponent<TableProductsProps> = ({products}) =>{
          fetch("http://localhost:9090/api/v1/product")
            .then((response) => response.json())
            .then((data) => {
-             productList?.[1](data);
+             productList?.[1](data.content);
+             pagination?.[1](data.totalPages);
              const categories: string[] = Array.from(
                new Set(
-                 data.map((product: { category: Product }) => product.category)
+                 data.content.map((product: { category: Product }) => product.category)
                )
              );
              categoryProducts?.[1](categories);
            });
+          closeModal();
       }
       
       console.log(data);
@@ -85,51 +88,6 @@ const TableProducts:FunctionComponent<TableProductsProps> = ({products}) =>{
         ></TableComponent>
 
         {/* Add product modal */}
-        {/* <Modal
-          isOpen={showModal}
-          onRequestClose={closeModal}
-          contentLabel="Add product"
-          style={customStyles}
-        >
-          <div className="gap-3 flex flex-col">
-            <h3 className="text-xl font-semibold">Add a new product</h3>
-            <form onSubmit={onSubmit} className="gap-2.5 flex flex-col ">
-              <InputField
-                type={"text"}
-                field={"productName"}
-                placeholder={"Milk, Beef, ..."}
-                label={"Product name"}
-              />
-              <SelectField
-                optionName={"category"}
-                options={[]}
-                label={"Product category"}
-              ></SelectField>
-              <InputField
-                type={"number"}
-                field={"stock"}
-                placeholder={"5"}
-                label={"Product stock"}
-              />
-              <InputField
-                type={"number"}
-                field={"price"}
-                placeholder={"$32.5"}
-                label={"Product price"}
-              />
-              <div className="flex justify-end gap-3">
-                <Button variant={"secondary"} onClick={closeModal}>
-                  Cancelar
-                </Button>
-                <Button variant={"primary"} typeof="submit">
-                  Add product
-                </Button>
-              </div>
-            </form>
-          </div>
-        </Modal> */}
-
-        {/* Edit product modal */}
         <Modal
           isOpen={showModal}
           onRequestClose={closeModal}
@@ -167,7 +125,7 @@ const TableProducts:FunctionComponent<TableProductsProps> = ({products}) =>{
                 label={"Product price"}
               />
               <InputField
-                {...register("expirationDate", { required: true })}
+                {...register("expirationDate", { required: false })}
                 type={"date"}
                 field={"expirationDate"}
                 placeholder={"25-05-2025"}

@@ -2,7 +2,7 @@ import { FunctionComponent, useContext } from "react";
 import InputField from "../atoms/InputField";
 import SelectField from "../atoms/SelectField";
 import Button from "../atoms/Button";
-import { ProductCategoryContext, ProductListContext } from "../../App";
+import { PaginationContext, ProductCategoryContext, ProductListContext } from "../../App";
 import { useForm } from "react-hook-form";
 
 interface SearchBoxProps{
@@ -12,17 +12,18 @@ interface SearchBoxProps{
 const SearchBox: FunctionComponent<SearchBoxProps> = ({}) =>{
   
   const categories = useContext(ProductCategoryContext);
+  const pagination = useContext(PaginationContext);
   const productList = useContext(ProductListContext);
   const {register,handleSubmit} =useForm();
 
   const onSubmit = handleSubmit((data) => {
     fetch(
-      `http://localhost:9090/api/v1/product/search?name=${data.name}&category=${data.category}&stock=${data.stock}`
+      `http://localhost:9090/api/v1/product?name=${data.name}&category=${data.category}&stock=${data.stock}`
     )
       .then((response) => response.json())
       .then((data) => {
-        productList?.[1](data);
-        console.log(data); // Update product data with search results
+        productList?.[1](data.content);
+        pagination?.[1](data.totalPages);
       })
       .catch((error) =>
         console.error("Error fetching searched products:", error)

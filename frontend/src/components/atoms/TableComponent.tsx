@@ -1,4 +1,4 @@
-import { FunctionComponent, HTMLAttributes,useContext,useMemo, useState } from "react";
+import { FunctionComponent, HTMLAttributes,useContext,useEffect,useMemo, useState } from "react";
 import {
   getCoreRowModel,
   useReactTable,
@@ -29,13 +29,12 @@ export type Product = {
 
 const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
 
-  const productList = useContext(ProductListContext);
+    const productList = useContext(ProductListContext);
     const [pagination, setPagination] = useState({
       pageIndex: 0,
       pageSize: 10,
     });
-  const paginationRow = useContext(PaginationContext);
-  console.log(paginationRow?.[0]);
+    const paginationRow = useContext(PaginationContext);
     const [sorting, setSorting] = useState<SortingState>([]); 
         const columns = useMemo<ColumnDef<Product>[]>(
           () => [
@@ -96,7 +95,7 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
               accessorKey: "category",
               cell: ({ row }) => (
                 <div className="w-full gap-2 flex justify-center m-2">
-                  <Button className="w-3 h-auto" variant={"secondary"}>
+                  <Button variant={"secondary"}>
                     <FontAwesomeIcon icon={faPenToSquare} />
                   </Button>
                   <Button variant={"secondary"}>
@@ -115,8 +114,8 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
           columns,
           getCoreRowModel: getCoreRowModel(),
           manualPagination:true,
-          rowCount:paginationRow?.[0],
-          //getPaginationRowModel: getPaginationRowModel(),
+          pageCount:paginationRow?.[0],
+          getPaginationRowModel: getPaginationRowModel(),
           onPaginationChange: setPagination,
           getSortedRowModel: getSortedRowModel(),
           onSortingChange:setSorting,
@@ -128,6 +127,22 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
             sorting,
           },
         });
+
+    useEffect(()=>{
+      const fetchPage = async()=>{
+        try{
+          const res = await fetch(`http://localhost:9090/api/v1/product?page=${pagination.pageIndex}&size=${pagination.pageSize}`);
+          const data = await res.json();
+          productList?.[1](data.content);
+          paginationRow?.[1](data.totalPages);
+        }catch(error){
+          console.log('error');
+        }
+      }
+
+      fetchPage();
+    },[pagination])
+
     return (
       <div className="w-full gap-3 flex flex-col">
         <table className="w-full">

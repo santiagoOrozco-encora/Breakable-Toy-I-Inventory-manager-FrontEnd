@@ -38,11 +38,18 @@ function ProductManager() {
     fetch("http://localhost:9090/api/v1/product")
       .then((response) => response.json())
       .then((data) => {
-        setProductData(data)
-        const categories:string[] = Array.from(
-        new Set(data.map((product: { category: Product; }) => product.category)));
-      setproductCategory(categories);
-    }
+        // console.log(data.totalPages);
+        setProductData(data.content);
+        setPagination(data.totalPages)
+        const categories: string[] = Array.from(
+          new Set(
+            data.content.map(
+              (product: { category: Product }) => product.category
+            )
+          )
+        );
+        setproductCategory(categories);
+      }
 
       
     );
@@ -50,18 +57,14 @@ function ProductManager() {
 
   },[]);
 
-  useEffect(()=>{
-    setPagination(productData.length);
-  },[productData]);
-
   return (
     <>
       <ProductListContext.Provider value={[productData, setProductData]}>
         <ProductCategoryContext.Provider
           value={[productCategory, setproductCategory]}
         >
-          <Header />
           <PaginationContext.Provider value={[pagination,setPagination]}>
+          <Header />
             <main className="w-full m-10 flex justify-center">
               <TableProducts products={productData || []} />
               <Metrics />

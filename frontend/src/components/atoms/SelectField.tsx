@@ -1,8 +1,8 @@
-import { FunctionComponent, HTMLAttributes } from "react";
+import { FunctionComponent, HTMLProps } from "react";
 
 
 
-interface SelectFieldProps extends HTMLAttributes<HTMLSelectElement>{
+interface SelectFieldProps extends HTMLProps<HTMLSelectElement>{
     optionName: string,
     options?: string[]
     label:string

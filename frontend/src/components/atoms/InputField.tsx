@@ -1,6 +1,6 @@
-import { FunctionComponent, HTMLAttributes } from "react";
+import { FunctionComponent, HTMLProps } from "react";
 
-interface InputFieldProps extends HTMLAttributes<HTMLInputElement>{
+interface InputFieldProps extends HTMLProps<HTMLInputElement>{
     type: 'number' | 'text' | 'date',
     field: string,
     placeholder:string,

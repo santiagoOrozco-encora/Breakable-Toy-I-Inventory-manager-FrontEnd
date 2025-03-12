@@ -5,11 +5,10 @@ import Button from "../atoms/Button";
 import { PaginationContext, ProductCategoryContext, ProductListContext } from "../../App";
 import { useForm } from "react-hook-form";
 
-interface SearchBoxProps{
-}
+type SearchBoxProps = object
 
 
-const SearchBox: FunctionComponent<SearchBoxProps> = ({}) =>{
+const SearchBox: FunctionComponent<SearchBoxProps> = () =>{
   
   const categories = useContext(ProductCategoryContext);
   const pagination = useContext(PaginationContext);
@@ -22,8 +21,8 @@ const SearchBox: FunctionComponent<SearchBoxProps> = ({}) =>{
     )
       .then((response) => response.json())
       .then((data) => {
-        productList?.[1](data.content);
-        pagination?.[1](data.totalPages);
+        productList?.[1](data.pageList);
+        pagination?.[1](data.pageCount);
       })
       .catch((error) =>
         console.error("Error fetching searched products:", error)

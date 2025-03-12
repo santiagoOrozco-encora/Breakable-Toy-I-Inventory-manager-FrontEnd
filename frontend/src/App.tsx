@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useEffect, useState } from 'react';
 import './App.css'
 import Header from './components/organisms/Header';
@@ -38,12 +39,11 @@ function ProductManager() {
     fetch("http://localhost:9090/api/v1/product")
       .then((response) => response.json())
       .then((data) => {
-        // console.log(data.totalPages);
-        setProductData(data.content);
-        setPagination(data.totalPages)
+        setProductData(data.pageList);
+        setPagination(data.pageCount);
         const categories: string[] = Array.from(
           new Set(
-            data.content.map(
+            data.pageList.map(
               (product: { category: Product }) => product.category
             )
           )

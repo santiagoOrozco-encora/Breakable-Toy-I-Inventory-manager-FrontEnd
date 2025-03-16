@@ -2,7 +2,7 @@
 import { createContext, useEffect, useState } from 'react';
 import './App.css'
 import Header from './components/organisms/Header';
-import Metrics from './components/organisms/Metrics';
+import ShowMetrics, { Metrics } from './components/organisms/Metrics';
 import TableProducts from './components/organisms/TableProducts';
 import { Product } from './components/atoms/TableComponent';
 
@@ -34,6 +34,7 @@ function ProductManager() {
   const [productData, setProductData] = useState<Product[]>([]);
   const [productCategory, setproductCategory] = useState<string[]>([]);
   const [pagination,setPagination] = useState<number>(0);
+  const [metrics,setMetrics] = useState<Metrics[]>([]);
 
   useEffect(()=>{
     fetch("http://localhost:9090/api/v1/product")
@@ -50,12 +51,17 @@ function ProductManager() {
         );
         setproductCategory(categories);
       }
-
       
     );
-      
-
   },[]);
+
+  useEffect(()=>{
+    fetch("http://localhost:9090/api/v1/product/metrics")
+      .then((response) => response.json())
+      .then((data) => {
+        setMetrics(data);
+      });
+  },[productData])
 
   return (
     <>
@@ -65,9 +71,9 @@ function ProductManager() {
         >
           <PaginationContext.Provider value={[pagination,setPagination]}>
           <Header />
-            <main className="w-full m-10 flex justify-center">
+            <main className="w-full m-10 flex flex-col justify-center items-center">
               <TableProducts products={productData || []} />
-              <Metrics />
+              <ShowMetrics data={metrics || []} />
             </main>
           </PaginationContext.Provider>
         </ProductCategoryContext.Provider>

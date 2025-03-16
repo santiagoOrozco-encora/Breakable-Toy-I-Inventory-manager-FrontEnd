@@ -1,9 +1,10 @@
-import { FunctionComponent, useContext } from "react";
+import { FunctionComponent, useContext, useEffect, useState } from "react";
 import InputField from "../atoms/InputField";
 import SelectField from "../atoms/SelectField";
 import Button from "../atoms/Button";
 import { PaginationContext, ProductCategoryContext, ProductListContext } from "../../App";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
+import Multiselect from "multiselect-react-dropdown";
 
 type SearchBoxProps = object
 
@@ -13,9 +14,11 @@ const SearchBox: FunctionComponent<SearchBoxProps> = () =>{
   const categories = useContext(ProductCategoryContext);
   const pagination = useContext(PaginationContext);
   const productList = useContext(ProductListContext);
-  const {register,handleSubmit} =useForm();
+  const {register,handleSubmit,control} =useForm();
+  const [categoryOptions, setCategoryOptions] = useState<{name:string,id:string}[]>();
 
   const onSubmit = handleSubmit((data) => {
+    console.log(data.category);
     fetch(
       `http://localhost:9090/api/v1/product?name=${data.name}&category=${data.category}&stock=${data.stock}`
     )
@@ -29,6 +32,15 @@ const SearchBox: FunctionComponent<SearchBoxProps> = () =>{
       );
   });
 
+  useEffect(()=>{
+    const opts: { name: string; id: string; }[] = [];
+    categories?.[0].forEach((c)=>{
+      opts.push({name:c, id:c})
+    })
+
+    setCategoryOptions(opts);
+  },[categories])
+
     return (
       <div className="flex flex-col border rounded p-3 px-5 gap-5 w-9/12">
         <h1 className="font-semibold text-2xl w-fit">Search of products</h1>
@@ -37,22 +49,35 @@ const SearchBox: FunctionComponent<SearchBoxProps> = () =>{
           onSubmit={onSubmit}
         >
           <InputField
-          {...register('name')}
+            {...register("name")}
             type={"text"}
             field={"productName"}
             placeholder={"Milk"}
             label={"Name of the product"}
           />
+          <Controller
+            name="category"
+            control={control}
+            defaultValue={[]}
+            render={({ field }) => (
+              <Multiselect
+                {...field}
+                className="w-full"
+                options={categoryOptions}
+                displayValue="name"
+                placeholder="Select categories"
+                onSelect={(selectedList) => {
+                  field.onChange(selectedList.map((item: { name: string; }) => item.name)); // Se pasa solo el nombre de las categorías seleccionadas
+                }}
+                onRemove={(selectedList) => {
+                  field.onChange(selectedList.map((item: {name:string}) => item.name)); // Se actualiza cuando se deselecciona una categoría
+                }}
+              />
+            )}
+          />
+
           <SelectField
-          {...register('category')}
-            optionName={"Category"}
-            options={categories?.[0] ? categories[0] : []}
-            label="Category"
-          >
-            Select the product category
-          </SelectField>
-          <SelectField
-          {...register('stock')}
+            {...register("stock")}
             optionName={"productState"}
             label="Availability"
           >

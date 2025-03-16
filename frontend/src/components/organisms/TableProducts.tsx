@@ -54,7 +54,6 @@ const TableProducts:FunctionComponent<TableProductsProps> = () =>{
     //Add product function
     const onSubmit = handleSubmit((async data=>{
       try{
-        console.log(JSON.stringify(data))
         const res = await fetch(`http://localhost:9090/api/v1/product/addProduct`,{
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -64,7 +63,7 @@ const TableProducts:FunctionComponent<TableProductsProps> = () =>{
          fetch("http://localhost:9090/api/v1/product")
            .then((response) => response.json())
            .then((data) => {
-             productList?.[1](data.content);
+             productList?.[1](data.pageList);
              pagination?.[1](data.totalPages);
              const categories: string[] = Array.from(
                new Set(
@@ -81,7 +80,6 @@ const TableProducts:FunctionComponent<TableProductsProps> = () =>{
           closeModal();
       }
       
-      console.log(data);
     }catch(error){
       console.log(error);
     }
@@ -89,6 +87,7 @@ const TableProducts:FunctionComponent<TableProductsProps> = () =>{
 
     return (
       <div className="w-9/12 m-10 flex justify-center flex-col gap-3">
+        
         {/* Tittle and add product button (Header) */}
         <div className="flex gap-3 m-2 items-start">
           <h2 className="text-2xl font-semibold">Products</h2>
@@ -118,7 +117,7 @@ const TableProducts:FunctionComponent<TableProductsProps> = () =>{
               onSubmit={onSubmit}
             >
               <InputField
-                {...register("name", { required: true })}
+                {...register("name", { required: true,max:120 })}
                 type={"text"}
                 field={"productName"}
                 placeholder={"Milk, Beef, ..."}
@@ -173,7 +172,7 @@ const TableProducts:FunctionComponent<TableProductsProps> = () =>{
               />
               <InputField
                 {...register("unitPrice", { required: true })}
-                type={"number"}
+                type={"decimal"}
                 field={"price"}
                 placeholder={"$32.5"}
                 label={"Product price"}

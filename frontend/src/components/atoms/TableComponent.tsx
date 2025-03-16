@@ -128,10 +128,11 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
             );
           }
         },
+        sortingFn: 'basic'
       },
       {
         header: "Actions",
-        accessorKey: "category",
+        accessorKey: "",
         cell: ({ row }) => (
           <div className="w-full gap-2 flex justify-center m-2">
             <Button
@@ -149,6 +150,7 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
           </div>
         ),
         enableSorting: false,
+        enableMultiSort: false
       },
     ],
     []
@@ -177,10 +179,29 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
 
   //Pagination refresh handler
   useEffect(() => {
+    
     const fetchPage = async () => {
       try {
+        const sortParams:string[] = [];
+        const orderParams:boolean[] = [];
+        sorting.map((sort) => {
+          sortParams.push(sort.id);
+          orderParams.push(sort.desc);
+      });
         const res = await fetch(
-          `http://localhost:9090/api/v1/product?page=${pagination.pageIndex}&size=${pagination.pageSize}&sort=${sorting[0]?.id}`
+          `http://localhost:9090/api/v1/product?page=${pagination.pageIndex}&size=${pagination.pageSize}&sort=${sortParams}&order=${orderParams}`
+        );
+        const data = await res.json();
+        productList?.[1](data.pageList);
+        paginationRow?.[1](data.pageCount);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    const fetchPageNoSort = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:9090/api/v1/product?page=${pagination.pageIndex}&size=${pagination.pageSize}`
         );
         const data = await res.json();
         productList?.[1](data.pageList);
@@ -190,7 +211,11 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
       }
     };
 
-    fetchPage();
+    if (sorting?.length > 0) {
+      fetchPage();
+    } else {
+      fetchPageNoSort();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pagination, sorting]);
 
@@ -483,31 +508,31 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
         style={customStyles}
       >
         <div className="gap-3 flex flex-col">
-          <h3 className="text-xl font-semibold">Add a new product</h3>
+          <h3 className="text-xl font-semibold">Edit product</h3>
           <form onSubmit={onSubmit} className="gap-2.5 flex flex-col ">
             <InputField
-              {...register("name")}
+              {...register("name" ,{required: true,max:120})}
               type={"text"}
               field={"productName"}
               placeholder={"Milk, Beef, ..."}
               label={"Product name"}
             />
             <SelectField
-              {...register("category")}
+              {...register("category", {required:true})}
               optionName={"category"}
               options={productCategory?.[0]}
               label={"Product category"}
             ></SelectField>
             <InputField
-              {...register("stock")}
+              {...register("stock",{required:true})}
               type={"number"}
               field={"stock"}
               placeholder={"5"}
               label={"Product stock"}
             />
             <InputField
-              {...register("unitPrice")}
-              type={"number"}
+              {...register("unitPrice",{required:true})}
+              type={"decimal"}
               field={"price"}
               placeholder={"$32.5"}
               label={"Product price"}

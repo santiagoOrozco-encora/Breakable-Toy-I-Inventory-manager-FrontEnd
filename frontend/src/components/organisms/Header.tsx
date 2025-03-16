@@ -1,7 +1,7 @@
 import { FunctionComponent } from "react";
 import SearchBox from "../molecules/SearchBox";
 
-interface HeaderProps{}
+type HeaderProps = object
 const Header:FunctionComponent<HeaderProps> = ()=>{
     return (
       <section className="w-full m-10 flex justify-center">

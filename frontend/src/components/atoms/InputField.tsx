@@ -1,14 +1,15 @@
-import { FunctionComponent, HTMLProps } from "react";
+import { HTMLProps, forwardRef } from "react";
 
-interface InputFieldProps extends HTMLProps<HTMLInputElement>{
-    type: 'number' | 'text' | 'date'|'decimal',
-    field: string,
-    placeholder:string,
-    label:string
+interface InputFieldProps extends HTMLProps<HTMLInputElement> {
+  type: "number" | "text" | "date" | "decimal";
+  field: string;
+  placeholder: string;
+  label: string;
 }
 
-const InputField: FunctionComponent<InputFieldProps> =({type,field,placeholder,label,...rest})=>{
-    const idField = field + 'input';
+const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
+  ({ type, field, placeholder, label, ...rest }, ref) => {
+    const idField = field + "input";
 
     switch (type) {
       case "text":
@@ -25,11 +26,11 @@ const InputField: FunctionComponent<InputFieldProps> =({type,field,placeholder,l
               type="text"
               name={idField}
               placeholder={placeholder}
+              ref={ref}
               {...rest}
             />
           </div>
         );
-        break;
 
       case "number":
         return (
@@ -45,11 +46,12 @@ const InputField: FunctionComponent<InputFieldProps> =({type,field,placeholder,l
               type="number"
               name={idField}
               placeholder={placeholder}
+              ref={ref}
               {...rest}
             />
           </div>
         );
-        break;
+
       case "date":
         return (
           <div className="flex flex-col gap-1 items-start w-full">
@@ -64,11 +66,12 @@ const InputField: FunctionComponent<InputFieldProps> =({type,field,placeholder,l
               type="date"
               name={idField}
               placeholder={placeholder}
+              ref={ref}
               {...rest}
             />
           </div>
         );
-        break;
+
       case "decimal":
         return (
           <div className="flex flex-col gap-1 items-start w-full">
@@ -83,13 +86,16 @@ const InputField: FunctionComponent<InputFieldProps> =({type,field,placeholder,l
               type="decimal"
               name={idField}
               placeholder={placeholder}
+              ref={ref}
               {...rest}
             />
           </div>
         );
-        break;
+
+      default:
+        return null;
     }
-    
-}
+  }
+);
 
 export default InputField;

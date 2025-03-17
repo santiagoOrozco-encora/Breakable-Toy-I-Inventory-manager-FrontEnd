@@ -5,6 +5,7 @@ import Button from "../atoms/Button";
 import { PaginationContext, ProductCategoryContext, ProductListContext } from "../../App";
 import { Controller, useForm } from "react-hook-form";
 import Multiselect from "multiselect-react-dropdown";
+import { getProducts } from "../../service";
 
 type SearchBoxProps = object
 
@@ -17,19 +18,31 @@ const SearchBox: FunctionComponent<SearchBoxProps> = () =>{
   const {register,handleSubmit,control} =useForm();
   const [categoryOptions, setCategoryOptions] = useState<{name:string,id:string}[]>();
 
+  const CSSStyle = {
+    multiselectContainer: {
+      width: "100%",
+    },
+    searchBox: {
+      width: "100%",
+      border: "none",
+      borderRadious: "none",
+      borderBottom: "1px solid #000",
+    },
+    inputField: {
+      width: "100%",
+    },
+    optionContainer: {
+      width: "100%",
+    },
+  };
+
   const onSubmit = handleSubmit((data) => {
-    console.log(data.category);
-    fetch(
-      `http://localhost:9090/api/v1/product?name=${data.name}&category=${data.category}&stock=${data.stock}`
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        productList?.[1](data.pageList);
-        pagination?.[1](data.pageCount);
-      })
-      .catch((error) =>
-        console.error("Error fetching searched products:", error)
-      );
+     const fetchAction =async () =>{
+          const productAllData = await getProducts({name:data?.name,category:data?.category,stock:data?.stock});
+          productList?.[1](productAllData.pageList);
+          pagination?.[1](productAllData.pageSize);
+        };
+      fetchAction();
   });
 
   useEffect(()=>{
@@ -60,19 +73,32 @@ const SearchBox: FunctionComponent<SearchBoxProps> = () =>{
             control={control}
             defaultValue={[]}
             render={({ field }) => (
-              <Multiselect
-                {...field}
-                className="w-full"
-                options={categoryOptions}
-                displayValue="name"
-                placeholder="Select categories"
-                onSelect={(selectedList) => {
-                  field.onChange(selectedList.map((item: { name: string; }) => item.name)); // Se pasa solo el nombre de las categorías seleccionadas
-                }}
-                onRemove={(selectedList) => {
-                  field.onChange(selectedList.map((item: {name:string}) => item.name)); // Se actualiza cuando se deselecciona una categoría
-                }}
-              />
+              <div className="w-full">
+                <label
+                  htmlFor="search_input"
+                  className="font-medium text-sm text-gray-700"
+                >
+                  Select the category
+                </label>
+                <Multiselect
+                  {...field}
+                  className="w-full"
+                  style={CSSStyle}
+                  options={categoryOptions}
+                  displayValue="name"
+                  placeholder="Select categories"
+                  onSelect={(selectedList) => {
+                    field.onChange(
+                      selectedList.map((item: { name: string }) => item.name)
+                    );
+                  }}
+                  onRemove={(selectedList) => {
+                    field.onChange(
+                      selectedList.map((item: { name: string }) => item.name)
+                    );
+                  }}
+                />
+              </div>
             )}
           />
 

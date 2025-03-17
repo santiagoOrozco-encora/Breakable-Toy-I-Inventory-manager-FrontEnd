@@ -1,24 +1,12 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useEffect, useState } from 'react';
 import './App.css'
-import Header from './components/organisms/Header';
-import ShowMetrics, { Metrics } from './components/organisms/Metrics';
-import TableProducts from './components/organisms/TableProducts';
-import { Product } from './components/atoms/TableComponent';
+import Header from './components/organisms/Header/Header';
+import TableProducts from './components/organisms/TableProduct/TableProducts';
+import { getMetrics, getProducts } from './service';
+import { Metrics, PaginationContextType, Product, ProductCategoryContextType, ProductListContextType } from './types/Types';
+import ShowMetrics from './components/organisms/Metrics/Metrics';
 
-type ProductListContextType = [
-   Product[],
-   React.Dispatch<React.SetStateAction<Product[]>>,
-];
-type ProductCategoryContextType = [
-  string[],
-  React.Dispatch<React.SetStateAction<string[]>>,
-];
-
-type PaginationContextType = [
-  number,
-  React.Dispatch<React.SetStateAction<number>>,
-];
 
 
 export const ProductListContext = createContext<ProductListContextType | undefined>(
@@ -37,30 +25,23 @@ function ProductManager() {
   const [metrics,setMetrics] = useState<Metrics[]>([]);
 
   useEffect(()=>{
-    fetch("http://localhost:9090/api/v1/product")
-      .then((response) => response.json())
-      .then((data) => {
-        setProductData(data.pageList);
-        setPagination(data.pageCount);
-        const categories: string[] = Array.from(
-          new Set(
-            data.pageList.map(
-              (product: { category: Product }) => product.category
-            )
-          )
-        );
-        setproductCategory(categories);
-      }
-      
-    );
+    const fetchAction =async () =>{
+      const productAllData = await getProducts({});
+      setProductData(productAllData.pageList);
+      setPagination(productAllData.pageSize);
+      setproductCategory(productAllData.categories);
+    };
+
+    fetchAction();
   },[]);
 
   useEffect(()=>{
-    fetch("http://localhost:9090/api/v1/product/metrics")
-      .then((response) => response.json())
-      .then((data) => {
-        setMetrics(data);
-      });
+    const fetchAction = async ()=>{
+      const metrics = await getMetrics();
+      setMetrics(metrics);
+    }
+
+    fetchAction();
   },[productData])
 
   return (

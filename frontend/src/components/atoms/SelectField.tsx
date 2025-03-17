@@ -1,15 +1,13 @@
-import { FunctionComponent, HTMLProps } from "react";
+import { HTMLProps, forwardRef } from "react";
 
-
-
-interface SelectFieldProps extends HTMLProps<HTMLSelectElement>{
-    optionName: string,
-    options?: string[]
-    label:string
+interface SelectFieldProps extends HTMLProps<HTMLSelectElement> {
+  optionName: string;
+  options?: string[];
+  label: string;
 }
 
-const SelectField: FunctionComponent<SelectFieldProps> = ({optionName,options,children,label,...rest}) => {
-
+const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(
+  ({ optionName, options, children, label, ...rest }, ref) => {
     return (
       <div className="flex flex-col gap-1 items-start w-full">
         <label
@@ -21,9 +19,10 @@ const SelectField: FunctionComponent<SelectFieldProps> = ({optionName,options,ch
         <select
           className="w-full border-b p-2 gap-0 text-base text-gray-500"
           id={optionName + "_select"}
+          ref={ref}
           {...rest}
         >
-          <option value="" key="defaul">
+          <option value="" key="default">
             {children}
           </option>
           {options ? (
@@ -34,20 +33,21 @@ const SelectField: FunctionComponent<SelectFieldProps> = ({optionName,options,ch
             ))
           ) : (
             <>
-                <option key={'1'} value={1}>
-                            {'In stock'}
-                </option>
-                <option key={'2'} value={2}>
-                    {'Out of stock'}
-                </option>
-                <option key={'3'} value={3}>
-                    {'All'}
-                </option>
+              <option key={"1"} value={1}>
+                {"In stock"}
+              </option>
+              <option key={"2"} value={2}>
+                {"Out of stock"}
+              </option>
+              <option key={"3"} value={3}>
+                {"All"}
+              </option>
             </>
           )}
         </select>
       </div>
     );
-}
+  }
+);
 
 export default SelectField;

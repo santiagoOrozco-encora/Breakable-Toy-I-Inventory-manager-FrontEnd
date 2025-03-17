@@ -1,5 +1,5 @@
 import { FunctionComponent } from "react";
-import SearchBox from "../molecules/SearchBox";
+import SearchBox from "../../molecules/SearchBox";
 
 type HeaderProps = object
 const Header:FunctionComponent<HeaderProps> = ()=>{

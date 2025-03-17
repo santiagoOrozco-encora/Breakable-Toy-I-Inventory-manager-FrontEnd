@@ -1,11 +1,13 @@
 import { FunctionComponent, useContext, useEffect, useState } from "react"
-import TableComponent, { Product } from "../atoms/TableComponent"
 import Modal from "react-modal";
-import Button from "../atoms/Button";
-import InputField from "../atoms/InputField";
-import SelectField from "../atoms/SelectField";
+import Button from "../../atoms/Button";
+import InputField from "../../atoms/InputField";
+import SelectField from "../../atoms/SelectField";
 import { useForm } from "react-hook-form";
-import { PaginationContext, ProductCategoryContext, ProductListContext } from "../../App";
+import { PaginationContext, ProductCategoryContext, ProductListContext } from "../../../App";
+import { Product } from "../../../types/Types";
+import TableComponent from "../../atoms/TableComponent/TableComponent";
+import { addProduct } from "../../../service";
 
 
 interface TableProductsProps{
@@ -37,7 +39,7 @@ const TableProducts:FunctionComponent<TableProductsProps> = () =>{
 
     const categoryValue = watch("category");
 
-      useEffect(()=>{
+    useEffect(()=>{
         if(!categoryValue){
           setNewCategory(true);
           setAddingCategory(true);
@@ -53,36 +55,11 @@ const TableProducts:FunctionComponent<TableProductsProps> = () =>{
 
     //Add product function
     const onSubmit = handleSubmit((async data=>{
-      try{
-        const res = await fetch(`http://localhost:9090/api/v1/product/addProduct`,{
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(data)
-      });
-      if(res.ok){
-         fetch("http://localhost:9090/api/v1/product")
-           .then((response) => response.json())
-           .then((data) => {
-             productList?.[1](data.pageList);
-             pagination?.[1](data.totalPages);
-             const categories: string[] = Array.from(
-               new Set(
-                 data.pageList.map(
-                   (product: { category: Product }) => product.category
-                 )
-               )
-             );
-             categoryProducts?.[1](categories);
-             console.log(productList?.[0]);
-             console.log(pagination?.[0]);
-             console.log(categoryProducts?.[0]);
-           });
-          closeModal();
-      }
-      
-    }catch(error){
-      console.log(error);
-    }
+      const productData = await addProduct(data);
+      productList?.[1](productData.pageList);
+      pagination?.[1](productData.pageSize);
+      categoryProducts?.[1](productData.categories);
+      closeModal();
   }))    
 
     return (

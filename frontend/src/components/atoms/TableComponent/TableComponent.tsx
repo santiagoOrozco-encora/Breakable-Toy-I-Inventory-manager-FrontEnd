@@ -8,27 +8,20 @@ import {
   SortingState,
   getSortedRowModel,
 } from "@tanstack/react-table";
-import Button from "../atoms/Button";
+import Button from "../../atoms/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrashAlt, faPenToSquare } from "@fortawesome/free-regular-svg-icons";
-import { PaginationContext, ProductCategoryContext, ProductListContext } from "../../App";
+import { PaginationContext, ProductCategoryContext, ProductListContext } from "../../../App";
 import Modal from "react-modal";
-import InputField from "./InputField";
-import SelectField from "./SelectField";
+import InputField from "../InputField";
+import SelectField from "../SelectField";
 import { useForm } from "react-hook-form";
+import { Product } from "../../../types/Types";
+import { deleteProduct, getProducts, setInStock, setOutOfStock, updateProduct} from "../../../service";
 
 interface TableComponentProps extends HTMLAttributes<HTMLTableElement>{
     data: Product[]
 }
-
-export type Product = {
-  id:string;
-  name: string;
-  category: string;
-  unitPrice: number;
-  expirationDate: Date;
-  stock: number;
-};
 
 const customStyles = {
   content: {
@@ -136,13 +129,13 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
         cell: ({ row }) => (
           <div className="w-full gap-2 flex justify-center m-2">
             <Button
-              variant={"secondary"}
+              variant={"primary"}
               onClick={() => openModal(row.original)}
             >
               <FontAwesomeIcon icon={faPenToSquare} />
             </Button>
             <Button
-              variant={"secondary"}
+              variant={"primary"}
               onClick={() => handleDelete(row.original)}
             >
               <FontAwesomeIcon icon={faTrashAlt} />{" "}
@@ -179,36 +172,22 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
 
   //Pagination refresh handler
   useEffect(() => {
-    
     const fetchPage = async () => {
-      try {
         const sortParams:string[] = [];
         const orderParams:boolean[] = [];
-        sorting.map((sort) => {
+        sorting.map((sort: { id: string; desc: boolean; }) => {
           sortParams.push(sort.id);
           orderParams.push(sort.desc);
       });
-        const res = await fetch(
-          `http://localhost:9090/api/v1/product?page=${pagination.pageIndex}&size=${pagination.pageSize}&sort=${sortParams}&order=${orderParams}`
-        );
-        const data = await res.json();
-        productList?.[1](data.pageList);
-        paginationRow?.[1](data.pageCount);
-      } catch (error) {
-        console.log(error);
-      }
-    };
+      const productData = await getProducts({page:pagination.pageIndex,size:pagination.pageSize,sort:sortParams,order:orderParams});
+      productList?.[1]((productData).pageList);
+      paginationRow?.[1]((productData).pageSize);
+  };
+
     const fetchPageNoSort = async () => {
-      try {
-        const res = await fetch(
-          `http://localhost:9090/api/v1/product?page=${pagination.pageIndex}&size=${pagination.pageSize}`
-        );
-        const data = await res.json();
-        productList?.[1](data.pageList);
-        paginationRow?.[1](data.pageCount);
-      } catch (error) {
-        console.log(error);
-      }
+      const productData = await getProducts({page:pagination.pageIndex,size:pagination.pageSize});
+      productList?.[1]((productData).pageList);
+      paginationRow?.[1]((productData).pageSize);
     };
 
     if (sorting?.length > 0) {
@@ -245,128 +224,62 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
 
   // Update product
   const onSubmit = handleSubmit(async (data) => {
-    try {
-      const res = await fetch(
-        `http://localhost:9090/api/v1/product/update?id=${selectedId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        }
-      );
-      if (res.ok) {
-        fetch("http://localhost:9090/api/v1/product")
-          .then((response) => response.json())
-          .then((data) => {
-            productList?.[1](data.pageList);
-            paginationRow?.[1](data.pageCount);
-            const categories: string[] = Array.from(
-              new Set(
-                data.pageList.map(
-                  (product: { category: Product }) => product.category
-                )
-              )
-            );
-            productCategory?.[1](categories);
-          });
-        closeModal();
-      }
-
-    } catch (error) {
-      console.log(error);
-    }
+    if(selectedId){
+      const productData = await updateProduct(data,selectedId)
+      productList?.[1](productData.pageList);
+      paginationRow?.[1](productData.pageSize);
+      productCategory?.[1](productData.categories);
+      closeModal();
+    }else{
+      throw Error;
+    };
   });
 
   //Delete product
   const handleDelete = async (row: Product) => {
-    try {
-      const res = await fetch(
-        `http://localhost:9090/api/v1/product?id=${row.id}`,
-        {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      if (res.ok) {
-        fetch("http://localhost:9090/api/v1/product")
-          .then((response) => response.json())
-          .then((data) => {
-            productList?.[1](data.pageList);
-            paginationRow?.[1](data.pageCount);
-            const categories: string[] = Array.from(
-              new Set(
-                data.pageList.map(
-                  (product: { category: Product }) => product.category
-                )
-              )
-            );
-            productCategory?.[1](categories);
-          });
-      }
-    } catch (error) {
-      console.log(error);
-    }
+    const productData = await deleteProduct(row.id);
+    productList?.[1](productData.pageList);
+    paginationRow?.[1](productData.pageSize);
+    productCategory?.[1](productData.categories);
+    // try {
+    //   const res = await fetch(
+    //     `http://localhost:9090/api/v1/product?id=${row.id}`,
+
+    //   );
+    //   if (res.ok) {
+    //     fetch("http://localhost:9090/api/v1/product")
+    //       .then((response) => response.json())
+    //       .then((data) => {
+    //         productList?.[1](data.pageList);
+    //         paginationRow?.[1](data.pageCount);
+    //         const categories: string[] = Array.from(
+    //           new Set(
+    //             data.pageList.map(
+    //               (product: { category: Product }) => product.category
+    //             )
+    //           )
+    //         );
+    //         productCategory?.[1](categories);
+    //       });
+    //   }
+    // } catch (error) {
+    //   console.log(error);
+    // }
   };
 
   //SetOutStock
   const outOfStock = async (row: Product) => {
-    try {
-      const res = await fetch(
-        `http://localhost:9090/api/v1/product/products/${row.id}/outofstock`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      if (res.ok) {
-        fetch("http://localhost:9090/api/v1/product")
-          .then((response) => response.json())
-          .then((data) => {
-            productList?.[1](data.pageList);
-            paginationRow?.[1](data.pageCount);
-            const categories: string[] = Array.from(
-              new Set(
-                data.pageList.map(
-                  (product: { category: Product }) => product.category
-                )
-              )
-            );
-            productCategory?.[1](categories);
-          });
-      }
-    } catch (error) {
-      console.log(error);
-    }
+    const productData = await setOutOfStock(row.id);
+     productList?.[1](productData.pageList);
+     paginationRow?.[1](productData.pageSize);
+     productCategory?.[1](productData.categories);
   };
   //SetDefaultStock
   const inStock = async (row: Product) => {
-    try {
-      const res = await fetch(
-        `http://localhost:9090/api/v1/product/products/${row.id}/instock`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      if (res.ok) {
-        fetch("http://localhost:9090/api/v1/product")
-          .then((response) => response.json())
-          .then((data) => {
-            productList?.[1](data.pageList);
-            paginationRow?.[1](data.pageCount);
-            const categories: string[] = Array.from(
-              new Set(
-                data.pageList.map(
-                  (product: { category: Product }) => product.category
-                )
-              )
-            );
-            productCategory?.[1](categories);
-          });
-      }
-    } catch (error) {
-      console.log(error);
-    }
+        const productData = await setInStock(row.id);
+        productList?.[1](productData.pageList);
+        paginationRow?.[1](productData.pageSize);
+        productCategory?.[1](productData.categories);
   };
 
   // Row background color calculation

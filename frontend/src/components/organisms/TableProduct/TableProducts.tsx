@@ -33,9 +33,10 @@ const TableProducts:FunctionComponent<TableProductsProps> = () =>{
     const pagination = useContext(PaginationContext);
     const productList = useContext(ProductListContext);
     const [showModal,setShowModal] = useState(false);
-    const [newcategory,setNewCategory] = useState(true);
+    const [newcategory,setNewCategory] = useState(false);
     const [addingCategory, setAddingCategory] = useState(true);
-    const {register,handleSubmit,watch,setValue} = useForm();
+    const [error,setError] = useState(false);
+    const {register,handleSubmit,watch,setValue,reset} = useForm();
 
     const categoryValue = watch("category");
 
@@ -50,21 +51,27 @@ const TableProducts:FunctionComponent<TableProductsProps> = () =>{
         setShowModal(true);
     }
     const closeModal = () => {
+      reset();
       setShowModal(false);
     };
 
     //Add product function
     const onSubmit = handleSubmit((async data=>{
       const productData = await addProduct(data);
-      productList?.[1](productData.pageList);
-      pagination?.[1](productData.pageSize);
-      categoryProducts?.[1](productData.categories);
+      if(productData != undefined){
+        productList?.[1](productData.pageList);
+        pagination?.[1](productData.pageSize);
+        categoryProducts?.[1](productData.categories);
+        reset();
+      }else{
+        setError(true);
+        console.log(productData);
+      }
       closeModal();
   }))    
 
     return (
       <div className="w-9/12 m-10 flex justify-center flex-col gap-3">
-        
         {/* Tittle and add product button (Header) */}
         <div className="flex gap-3 m-2 items-start">
           <h2 className="text-2xl font-semibold">Products</h2>
@@ -84,6 +91,7 @@ const TableProducts:FunctionComponent<TableProductsProps> = () =>{
           isOpen={showModal}
           onRequestClose={closeModal}
           contentLabel="Add product"
+          ariaHideApp={false}
           style={customStyles}
         >
           <div className="gap-3 flex flex-col">
@@ -93,31 +101,37 @@ const TableProducts:FunctionComponent<TableProductsProps> = () =>{
               className="gap-2.5 flex flex-col "
               onSubmit={onSubmit}
             >
+              {/* Product name */}
               <InputField
-                {...register("name", { required: true,max:120 })}
+                {...register("name", { required: true, max: 120 })}
                 type={"text"}
                 field={"productName"}
                 placeholder={"Milk, Beef, ..."}
                 label={"Product name"}
               />
-              <SelectField
-                {...register("category", { required: true })}
-                optionName={"category"}
-                disabled={!addingCategory}
-                options={categoryProducts?.[0]}
-                label={"Product category"}
-                onChange={(e) => {
-                  const value = (e.target as HTMLInputElement).value;
-                  if(value){
-                    setNewCategory(false)
-                    setValue("category",value)
-                  }else{
-                    setNewCategory(true);
-                  }
-                }}
-              >
-                Select category
-              </SelectField>
+              {/* Select of category */}
+              {addingCategory == true && (
+                <SelectField
+                  {...register("category", { required: true })}
+                  optionName={"category"}
+                  disabled={!addingCategory}
+                  options={categoryProducts?.[0]}
+                  label={"Product category"}
+                  onChange={(e) => {
+                    const value = (e.target as HTMLInputElement).value;
+                    if (value) {
+                      setNewCategory(false);
+                      setValue("category", value);
+                    } else {
+                      setNewCategory(true);
+                      setValue("category", value);
+                    }
+                  }}
+                >
+                  Select category
+                </SelectField>
+              )}
+              {/* Add a new category input */}
               {newcategory && (
                 <div className="flex flex-col gap-2">
                   <InputField
@@ -129,9 +143,9 @@ const TableProducts:FunctionComponent<TableProductsProps> = () =>{
                       const value = (e.target as HTMLInputElement).value;
                       setValue("category", value);
                       if (value) {
-                        setAddingCategory(true);
-                      }else{
                         setAddingCategory(false);
+                      } else {
+                        setAddingCategory(true);
                       }
                     }}
                     placeholder="New category name"
@@ -139,7 +153,7 @@ const TableProducts:FunctionComponent<TableProductsProps> = () =>{
                   />
                 </div>
               )}
-
+              {/* Stock input */}
               <InputField
                 {...register("stock", { required: true })}
                 type={"number"}
@@ -147,6 +161,7 @@ const TableProducts:FunctionComponent<TableProductsProps> = () =>{
                 placeholder={"5"}
                 label={"Product stock"}
               />
+              {/* Unit price input */}
               <InputField
                 {...register("unitPrice", { required: true })}
                 type={"decimal"}
@@ -154,6 +169,7 @@ const TableProducts:FunctionComponent<TableProductsProps> = () =>{
                 placeholder={"$32.5"}
                 label={"Product price"}
               />
+              {/* Expiration date input */}
               <InputField
                 {...register("expirationDate", { required: false })}
                 type={"date"}
@@ -161,6 +177,7 @@ const TableProducts:FunctionComponent<TableProductsProps> = () =>{
                 placeholder={"25-05-2025"}
                 label={"Expiration date"}
               />
+              {/* Action buttons */}
               <div className="flex justify-end gap-3">
                 <Button variant={"secondary"} onClick={closeModal}>
                   Cancelar
@@ -172,6 +189,11 @@ const TableProducts:FunctionComponent<TableProductsProps> = () =>{
             </form>
           </div>
         </Modal>
+        {error &&<dialog open>
+          Product duplicated
+          <Button variant={"primary"} typeof="close" onClick={()=>setError(false)}>Close</Button>
+        </dialog>}
+
       </div>
     );
 }

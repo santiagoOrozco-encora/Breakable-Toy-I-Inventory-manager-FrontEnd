@@ -25,8 +25,8 @@ const ShowMetrics:FunctionComponent<MetricsProps> = ({data}) =>{
               <tr key={category.category} className="items-center justify-center text-end gap-3 my-3">
                 <td className="my-3 font-bold border-r-black border-r-1 px-2">{category.category}</td>
                 <td className="my-3">{category.totalInStock.toFixed(2)}</td>
-                <td className="my-3">{category.valueInStock.toFixed(2)}</td>
-                <td className="my-3">{category.averageInStock.toFixed(2)}</td>
+                <td className="my-3">$ {category.valueInStock.toFixed(2)}</td>
+                <td className="my-3">$ {category.averageInStock.toFixed(2)}</td>
               </tr>
             ))}
           </tbody>

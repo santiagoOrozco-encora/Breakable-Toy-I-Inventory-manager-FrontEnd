@@ -79,9 +79,11 @@ export const addProduct = (data: any) => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
-  }).then(() => {
-    const productData = getProducts({});
-    return productData;
+  }).then((res) => {
+    if(res.status == 200){
+      const productData = getProducts({});
+      return productData;
+    }
   });
 };
 

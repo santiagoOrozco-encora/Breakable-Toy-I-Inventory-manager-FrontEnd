@@ -87,7 +87,12 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
       {
         header: "Expiration Date",
         accessorKey: "expirationDate",
-        // sortingFn: 'datetime',
+        cell: ({row}) => {
+          const productDate =new Date(row.original.expirationDate);
+          return (
+          <div>{productDate.toLocaleDateString()}</div>
+        )},
+        sortingFn: 'datetime',
       },
       {
         header: "Stock",
@@ -241,30 +246,6 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
     productList?.[1](productData.pageList);
     paginationRow?.[1](productData.pageSize);
     productCategory?.[1](productData.categories);
-    // try {
-    //   const res = await fetch(
-    //     `http://localhost:9090/api/v1/product?id=${row.id}`,
-
-    //   );
-    //   if (res.ok) {
-    //     fetch("http://localhost:9090/api/v1/product")
-    //       .then((response) => response.json())
-    //       .then((data) => {
-    //         productList?.[1](data.pageList);
-    //         paginationRow?.[1](data.pageCount);
-    //         const categories: string[] = Array.from(
-    //           new Set(
-    //             data.pageList.map(
-    //               (product: { category: Product }) => product.category
-    //             )
-    //           )
-    //         );
-    //         productCategory?.[1](categories);
-    //       });
-    //   }
-    // } catch (error) {
-    //   console.log(error);
-    // }
   };
 
   //SetOutStock
@@ -419,32 +400,33 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
         onRequestClose={closeModal}
         contentLabel="Add product"
         style={customStyles}
+        ariaHideApp={false}
       >
         <div className="gap-3 flex flex-col">
           <h3 className="text-xl font-semibold">Edit product</h3>
           <form onSubmit={onSubmit} className="gap-2.5 flex flex-col ">
             <InputField
-              {...register("name" ,{required: true,max:120})}
+              {...register("name", { required: true, max: 120 })}
               type={"text"}
               field={"productName"}
               placeholder={"Milk, Beef, ..."}
               label={"Product name"}
             />
             <SelectField
-              {...register("category", {required:true})}
+              {...register("category", { required: true })}
               optionName={"category"}
               options={productCategory?.[0]}
               label={"Product category"}
             ></SelectField>
             <InputField
-              {...register("stock",{required:true})}
+              {...register("stock", { required: true })}
               type={"number"}
               field={"stock"}
               placeholder={"5"}
               label={"Product stock"}
             />
             <InputField
-              {...register("unitPrice",{required:true})}
+              {...register("unitPrice", { required: true })}
               type={"decimal"}
               field={"price"}
               placeholder={"$32.5"}

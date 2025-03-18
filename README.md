@@ -5,19 +5,41 @@ This project is part of the spark program assignments, the objective is to devel
 ths project will be developed with the next technologies:
 
 **Front-End**
-- ReactJS
-- Typescript
-- React Context
-- Jest
-- Vite
-- Vitest
+- [ReactJS](https://react.dev/) *18.2.0*
+    - Typescript *^5.3.3*
+- [Jest]([url](https://jestjs.io/)) *^29.7.0*
+- [Vite]([url](https://vite.dev/guide/)) *^6.2.2*
+- [Vitest]([url](https://vitest.dev/)) *^3.0.9*
   
 **With the help of the next dependies and libraries:**
-- TanstackTable
-- React hooks
-- React modal
-- Multiselect react dropdown
-- Tailwind
+- [TanstackTable]([url](https://tanstack.com/)) *^8.21.2*
+- [React hooks]( https://react-hook-form.com/) *^7.54.2*
+- [React modal]([url](https://www.npmjs.com/package/react-modal)) *^3.16.3*
+- [Multiselect react dropdown]([url](https://www.npmjs.com/package/multiselect-react-dropdown)) *^2.0.25*
+- [Tailwind]([url](https://tailwindcss.com/)) *^3.4.17*
+- [FontAwesome]([url](https://docs.fontawesome.com/)) *^0.2.2*
+
+# Installation
+
+To the instalation of this project is necessary to have node instaled in a stable version, at the moment of the creation of this document the version used for this project is: ```v23.7.0```
+
+You can download and install node **[here]([url](https://nodejs.org/es))**.
+
+> It's important to inform that the project is setted to work on PORT:9090, if for any reason this port is busy or you whish to change it you can find and modify this in the archive named **config.ts** in the project.
+
+Once you have node installed you'll need to go your terminal of preference, locate in the desired directory to download the project,clone the repository and then execute the next commands:
+```
+git clone ${url of the repository}
+//in case you haven't clone the project repository
+
+npm install
+```
+
+Next to run the project is necessary to run the next command line:
+
+```
+npm run dev
+```
 
 **Functionalities**
 - *Adding of products:*
@@ -65,56 +87,6 @@ In the product table it will change the appareance of the rows and cells dependi
 - Stock < 5 - Red
 - Out of stock products should have a strike-through text.
 
-# Installation
-> It's important to inform that the project is setted to work on PORT:9090, if for any reason this port is busy or you whish to change it you can find and modify this in the archive named **config.ts** in the project.
 
-To the instalation of this project is necessary to have node instaled in a stable version, at the moment of the creation of this document the version used for this project is: ```v23.7.0```
 
-Once you have node installed you'll need to go your terminal of preference, locate in the desired directory to download the project,clone the repository and then execute the next commands:
-```
-git clone ${url of the repository}
-//in case you haven't clone the project repository
-
-npm install
-```
-
-Next to run the project is necessary to run the next command line:
-
-```
-npm run dev
-```
-
-## May use links
-Following there's link to documentation relationated with the project and the technologies and dependencies used in this project:
-
-- Vite
-
-  https://vite.dev/guide/
-
-- Tanstack
-
-  https://tanstack.com/
   
-- Jest
-
-  https://jestjs.io/
-
-- Vitest
-
-  https://vitest.dev/
-
-- React
-
-  https://react.dev/
-  
-- Multiselect dropdown
-  
-  https://www.npmjs.com/package/multiselect-react-dropdown
-
-- React form hook
-
-  https://react-hook-form.com/
-
-- Tailwind
-
-  https://tailwindcss.com/

@@ -7,23 +7,23 @@ ths project will be developed with the next technologies:
 **Front-End**
 - [ReactJS](https://react.dev/) *18.2.0*
     - Typescript *^5.3.3*
-- [Jest]([url](https://jestjs.io/)) *^29.7.0*
-- [Vite]([url](https://vite.dev/guide/)) *^6.2.2*
-- [Vitest]([url](https://vitest.dev/)) *^3.0.9*
+- [Jest](https://jestjs.io/) *^29.7.0*
+- [Vite](https://vite.dev/guide/) *^6.2.2*
+- [Vitest](https://vitest.dev/) *^3.0.9*
   
 **With the help of the next dependies and libraries:**
-- [TanstackTable]([url](https://tanstack.com/)) *^8.21.2*
+- [TanstackTable](https://tanstack.com/) *^8.21.2*
 - [React hooks]( https://react-hook-form.com/) *^7.54.2*
-- [React modal]([url](https://www.npmjs.com/package/react-modal)) *^3.16.3*
-- [Multiselect react dropdown]([url](https://www.npmjs.com/package/multiselect-react-dropdown)) *^2.0.25*
-- [Tailwind]([url](https://tailwindcss.com/)) *^3.4.17*
-- [FontAwesome]([url](https://docs.fontawesome.com/)) *^0.2.2*
+- [React modal](https://www.npmjs.com/package/react-modal) *^3.16.3*
+- [Multiselect react dropdown](https://www.npmjs.com/package/multiselect-react-dropdown) *^2.0.25*
+- [Tailwind](https://tailwindcss.com/) *^3.4.17*
+- [FontAwesome](https://docs.fontawesome.com/) *^0.2.2*
 
 # Installation
 
 To the instalation of this project is necessary to have node instaled in a stable version, at the moment of the creation of this document the version used for this project is: ```v23.7.0```
 
-You can download and install node **[here]([url](https://nodejs.org/es))**.
+You can download and install node **[here](https://nodejs.org/es)**.
 
 > It's important to inform that the project is setted to work on PORT:9090, if for any reason this port is busy or you whish to change it you can find and modify this in the archive named **config.ts** in the project.
 

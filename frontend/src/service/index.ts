@@ -144,3 +144,13 @@ export const deleteProduct = (id:string)=>{
     return productData;
   })
 }
+
+export const validateExpirationDate = (value:any) => {
+  if (!value) return true;
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const selectedDate = new Date(value);
+    return (
+      selectedDate >= (tomorrow || null) || "Please select a date starting from tomorrow."
+    );
+  };

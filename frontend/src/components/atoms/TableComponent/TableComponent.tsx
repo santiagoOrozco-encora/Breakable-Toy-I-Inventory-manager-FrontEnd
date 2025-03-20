@@ -15,9 +15,9 @@ import { PaginationContext, ProductCategoryContext, ProductListContext } from ".
 import Modal from "react-modal";
 import InputField from "../InputField";
 import SelectField from "../SelectField";
-import { useForm } from "react-hook-form";
-import { Product } from "../../../types/Types";
-import { deleteProduct, getProducts, setInStock, setOutOfStock, updateProduct} from "../../../service";
+import { FieldError, useForm } from "react-hook-form";
+import { Product, ProductData } from "../../../types/Types";
+import { deleteProduct, getProducts, setInStock, setOutOfStock, updateProduct, validateExpirationDate} from "../../../service";
 
 interface TableComponentProps extends HTMLAttributes<HTMLTableElement>{
     data: Product[]
@@ -47,27 +47,18 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
   const [showModal, setShowModal] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const { register, handleSubmit, setValue } = useForm();
+  const { register, handleSubmit, setValue, formState:{errors} } = useForm();
 
   //Column definition
   const columns = useMemo<ColumnDef<Product>[]>(
     () => [
       {
         id: "select",
-        // header: () => (
-        //   <div>
-        //     <input
-        //       type="checkbox"
-        //       checked={selectAll}
-        //       onChange={handleSelectAll}
-        //     />
-        //   </div>
-        // ),
         cell: ({ row }) => (
           <div>
             <input
               type="checkbox"
-              // checked={selectedRows.includes(row.original.id)}
+              className="w-full h-full"
               onChange={(e) => handleCheckBox(e, row.original)}
             />
           </div>
@@ -88,6 +79,8 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
         header: "Expiration Date",
         accessorKey: "expirationDate",
         cell: ({row}) => {
+          if(!row.original.expirationDate)
+            return <div></div>;
           const productDate =new Date(row.original.expirationDate);
           return (
           <div>{productDate.toLocaleDateString()}</div>
@@ -204,12 +197,19 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
   }, [pagination, sorting]);
 
   //Handle checkbox
-  const handleCheckBox = (e: ChangeEvent<HTMLInputElement>, row: Product) => {
+  const handleCheckBox = async (e: ChangeEvent<HTMLInputElement>, row: Product) => {
+
+    let productData:ProductData;
     if (e.target.checked == true) {
-      outOfStock(row);
+      //outOfStock(row);
+      productData = await setOutOfStock(row.id);
     } else {
-      inStock(row);
+      //inStock(row);
+      productData = await setInStock(row.id);
     }
+     productList?.[1](productData.pageList);
+     paginationRow?.[1](productData.pageSize);
+     productCategory?.[1](productData.categories);
   };
 
   //Edit modal functions
@@ -223,6 +223,7 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
     setValue("expirationDate", row.expirationDate);
     setValue("stock", row.stock);
   };
+
   const closeModal = () => {
     setShowModal(false);
   };
@@ -246,21 +247,6 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
     productList?.[1](productData.pageList);
     paginationRow?.[1](productData.pageSize);
     productCategory?.[1](productData.categories);
-  };
-
-  //SetOutStock
-  const outOfStock = async (row: Product) => {
-    const productData = await setOutOfStock(row.id);
-     productList?.[1](productData.pageList);
-     paginationRow?.[1](productData.pageSize);
-     productCategory?.[1](productData.categories);
-  };
-  //SetDefaultStock
-  const inStock = async (row: Product) => {
-        const productData = await setInStock(row.id);
-        productList?.[1](productData.pageList);
-        paginationRow?.[1](productData.pageSize);
-        productCategory?.[1](productData.categories);
   };
 
   // Row background color calculation
@@ -288,7 +274,7 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
   //Component
   return (
     <div className="w-full gap-3 flex flex-col">
-      <table className="w-full">
+      <table className="w-full border">
         <thead className="border-b bg-gray-200 p-3">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id} className="">
@@ -433,12 +419,20 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
               label={"Product price"}
             />
             <InputField
-              {...register("expirationDate", { required: false })}
+              {...register("expirationDate", {
+                required: false,
+                validate: validateExpirationDate,
+              })}
               type={"date"}
               field={"expirationDate"}
               placeholder={"25-05-2025"}
               label={"Expiration date"}
             />
+            {errors.expirationDate && (
+              <p style={{ color: "red" }}>
+                {(errors.expirationDate as FieldError).message}
+              </p>
+            )}
             <div className="flex justify-end gap-3">
               <Button variant={"secondary"} onClick={closeModal}>
                 Cancel

@@ -22,9 +22,7 @@ const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(
           ref={ref}
           {...rest}
         >
-          <option value="" key="default">
-            {children}
-          </option>
+          <option value="" key="default">Select an option</option>
           {options ? (
             options.map((opt) => (
               <option key={opt} value={opt}>
@@ -33,14 +31,14 @@ const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(
             ))
           ) : (
             <>
+              <option key={"default"} value={3}>
+                {"All"}
+              </option>
               <option key={"1"} value={1}>
                 {"In stock"}
               </option>
               <option key={"2"} value={2}>
                 {"Out of stock"}
-              </option>
-              <option key={"3"} value={3}>
-                {"All"}
               </option>
             </>
           )}

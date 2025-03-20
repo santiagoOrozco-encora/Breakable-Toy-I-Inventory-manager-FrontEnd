@@ -55,7 +55,7 @@ const SearchBox: FunctionComponent<SearchBoxProps> = () =>{
   },[categories])
 
     return (
-      <div className="flex flex-col border rounded p-3 px-5 gap-5 w-9/12">
+      <div className="flex flex-col  p-3 px-5 gap-5 w-9/12">
         <h1 className="font-semibold text-2xl w-fit">Search of products</h1>
         <form
           className="flex flex-col items-start lg:w-3/6 gap-5 w-full"

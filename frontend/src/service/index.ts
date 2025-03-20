@@ -1,5 +1,5 @@
 import { API_URL } from "../config";
-import { Metrics, Product, ProductData } from "../types/Types";
+import { Metrics, Product, ProductData, sample } from "../types/Types";
 
 export const getProducts = ({
   name,
@@ -144,6 +144,21 @@ export const deleteProduct = (id:string)=>{
     return productData;
   })
 }
+
+export const addProducts = () => {
+  const url = new URL(`${API_URL}/addProducts`);
+
+  return fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(sample),
+  }).then((res) => {
+    if (res.status == 200) {
+      const productData = getProducts({});
+      return productData;
+    }
+  });
+};
 
 export const validateExpirationDate = (value:any) => {
   if (!value) return true;

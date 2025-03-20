@@ -50,8 +50,10 @@ function ProductManager() {
         <ProductCategoryContext.Provider
           value={[productCategory, setproductCategory]}
         >
-          <PaginationContext.Provider value={[pagination,setPagination]}>
-          <Header />
+          <PaginationContext.Provider value={[pagination, setPagination]}>
+            <header className="w-full m-10 flex flex-col justify-center items-center">
+              <Header />
+            </header>
             <main className="w-full m-10 flex flex-col justify-center items-center">
               <TableProducts products={productData || []} />
               <ShowMetrics data={metrics || []} />

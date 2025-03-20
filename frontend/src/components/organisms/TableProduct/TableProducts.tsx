@@ -60,6 +60,7 @@ const TableProducts:FunctionComponent<TableProductsProps> = () =>{
       if (!data.expirationDate) {
         data.expirationDate = null;
       }
+      console.log(data);
         const productData = await addProduct(data);
       if(productData != undefined){
         productList?.[1](productData.pageList);
@@ -72,7 +73,7 @@ const TableProducts:FunctionComponent<TableProductsProps> = () =>{
   }))    
 
     return (
-      <div className="w-9/12 m-10 flex justify-center flex-col gap-3 border p-5">
+      <div className="w-9/12 my-10 flex justify-center flex-col gap-3 border py-5">
         {/* Tittle and add product button (Header) */}
         <div className="flex gap-3 m-2 items-start">
           <h2 className="text-2xl font-semibold">Products</h2>

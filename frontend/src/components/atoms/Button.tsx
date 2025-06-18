@@ -3,6 +3,7 @@ import { twMerge } from "tailwind-merge";
 
 interface ButtonProps extends HTMLAttributes<HTMLButtonElement> {
   variant: "primary" | "secondary" | "alt";
+  disabled?: boolean;
 }
 
 const BTNVARIANT = {
@@ -21,7 +22,15 @@ const Button: FunctionComponent<ButtonProps> = ({
   const btnStyle = BTNVARIANT[variant];
 
   return (
-    <button className={twMerge("hover:cursor-pointer", btnStyle)} {...rest}>
+    <button 
+      className={twMerge(
+        "hover:cursor-pointer", 
+        btnStyle, 
+        rest.disabled ? "opacity-50 cursor-not-allowed" : ""
+      )} 
+      disabled={rest.disabled}
+      {...rest}
+    >
       {children}
     </button>
   );

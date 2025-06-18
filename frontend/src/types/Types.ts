@@ -12,22 +12,31 @@ export type Metrics = {
   totalInStock: number;
   valueInStock: number;
 };
+export type PaginationInfo = {
+  pageSize: number;
+  totalItems: number;
+  currentPage: number;
+  totalPages: number;
+};
+
 export type ProductData = {
-    pageList: Product[];
-    pageSize: number;
-    categories: string[];
-}
+  pageList: Product[];
+  totalPages: number;
+  pageSize: number;
+  totalItems: number;
+  categories: string[];
+};
 export type ProductListContextType = [
-   Product[],
-   React.Dispatch<React.SetStateAction<Product[]>>,
+  Product[],
+  React.Dispatch<React.SetStateAction<Product[]>>,
 ];
 export type ProductCategoryContextType = [
   string[],
   React.Dispatch<React.SetStateAction<string[]>>,
 ];
 export type PaginationContextType = [
-  number,
-  React.Dispatch<React.SetStateAction<number>>,
+  PaginationInfo,
+  React.Dispatch<React.SetStateAction<PaginationInfo>>,
 ];
 
 export const sample = [

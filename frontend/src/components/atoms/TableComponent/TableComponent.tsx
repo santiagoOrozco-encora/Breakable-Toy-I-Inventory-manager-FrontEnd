@@ -1,4 +1,12 @@
-import { ChangeEvent, FunctionComponent, HTMLAttributes,useContext,useEffect,useMemo, useState } from "react";
+import {
+  ChangeEvent,
+  FunctionComponent,
+  HTMLAttributes,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   getCoreRowModel,
   useReactTable,
@@ -11,16 +19,27 @@ import {
 import Button from "../../atoms/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrashAlt, faPenToSquare } from "@fortawesome/free-regular-svg-icons";
-import { PaginationContext, ProductCategoryContext, ProductListContext } from "../../../App";
+import {
+  PaginationContext,
+  ProductCategoryContext,
+  ProductListContext,
+} from "../../../App";
 import Modal from "react-modal";
 import InputField from "../InputField";
 import SelectField from "../SelectField";
 import { FieldError, useForm } from "react-hook-form";
 import { Product, ProductData } from "../../../types/Types";
-import { deleteProduct, getProducts, setInStock, setOutOfStock, updateProduct, validateExpirationDate} from "../../../service";
+import {
+  deleteProduct,
+  getProducts,
+  setInStock,
+  setOutOfStock,
+  updateProduct,
+  validateExpirationDate,
+} from "../../../service";
 
-interface TableComponentProps extends HTMLAttributes<HTMLTableElement>{
-    data: Product[]
+interface TableComponentProps extends HTMLAttributes<HTMLTableElement> {
+  data: Product[];
 }
 
 const customStyles = {
@@ -35,7 +54,7 @@ const customStyles = {
   },
 };
 
-const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
+const TableComponent: FunctionComponent<TableComponentProps> = ({ data }) => {
   const productList = useContext(ProductListContext);
   const paginationRow = useContext(PaginationContext);
   const productCategory = useContext(ProductCategoryContext);
@@ -47,7 +66,12 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
   const [showModal, setShowModal] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const { register, handleSubmit, setValue, formState:{errors} } = useForm();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm();
 
   //Column definition
   const columns = useMemo<ColumnDef<Product>[]>(
@@ -67,7 +91,7 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
       },
       {
         header: "Category",
-        accessorKey:"category",
+        accessorKey: "category",
       },
       { header: "Product name", accessorKey: "name" },
       {
@@ -78,14 +102,12 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
       {
         header: "Expiration Date",
         accessorKey: "expirationDate",
-        cell: ({row}) => {
-          if(!row.original.expirationDate)
-            return <div></div>;
-          const productDate =new Date(row.original.expirationDate);
-          return (
-          <div>{productDate.toLocaleDateString()}</div>
-        )},
-        sortingFn: 'datetime',
+        cell: ({ row }) => {
+          if (!row.original.expirationDate) return <div></div>;
+          const productDate = new Date(row.original.expirationDate);
+          return <div>{productDate.toLocaleDateString()}</div>;
+        },
+        sortingFn: "datetime",
       },
       {
         header: "Stock",
@@ -119,17 +141,14 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
             );
           }
         },
-        sortingFn: 'basic'
+        sortingFn: "basic",
       },
       {
         header: "Actions",
         accessorKey: "",
         cell: ({ row }) => (
           <div className="w-full gap-2 flex justify-center m-2">
-            <Button
-              variant={"primary"}
-              onClick={() => openModal(row.original)}
-            >
+            <Button variant={"primary"} onClick={() => openModal(row.original)}>
               <FontAwesomeIcon icon={faPenToSquare} />
             </Button>
             <Button
@@ -141,7 +160,7 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
           </div>
         ),
         enableSorting: false,
-        enableMultiSort: false
+        enableMultiSort: false,
       },
     ],
     []
@@ -154,7 +173,7 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
     manualSorting: true,
-    pageCount: paginationRow?.[0],
+    pageCount: paginationRow?.[0].totalPages,
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
     getSortedRowModel: getSortedRowModel(),
@@ -171,21 +190,40 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
   //Pagination refresh handler
   useEffect(() => {
     const fetchPage = async () => {
-        const sortParams:string[] = [];
-        const orderParams:boolean[] = [];
-        sorting.map((sort: { id: string; desc: boolean; }) => {
-          sortParams.push(sort.id);
-          orderParams.push(sort.desc);
+      const sortParams: string[] = [];
+      const orderParams: boolean[] = [];
+      sorting.map((sort: { id: string; desc: boolean }) => {
+        sortParams.push(sort.id);
+        orderParams.push(sort.desc);
       });
-      const productData = await getProducts({page:pagination.pageIndex,size:pagination.pageSize,sort:sortParams,order:orderParams});
-      productList?.[1]((productData).pageList);
-      paginationRow?.[1]((productData).pageSize);
-  };
+      const productData = await getProducts({
+        page: pagination.pageIndex,
+        size: pagination.pageSize,
+        sort: sortParams,
+        order: orderParams,
+      });
+      console.log(productData);
+      productList?.[1](productData.pageList);
+      paginationRow?.[1]({
+        pageSize: productData.pageSize,
+        totalItems: productData.totalItems,
+        currentPage: pagination.pageIndex,
+        totalPages: productData.totalPages,
+      });
+    };
 
     const fetchPageNoSort = async () => {
-      const productData = await getProducts({page:pagination.pageIndex,size:pagination.pageSize});
-      productList?.[1]((productData).pageList);
-      paginationRow?.[1]((productData).pageSize);
+      const productData = await getProducts({
+        page: pagination.pageIndex,
+        size: pagination.pageSize,
+      });
+      productList?.[1](productData.pageList);
+      paginationRow?.[1]({
+        pageSize: productData.pageSize,
+        totalItems: productData.totalItems,
+        currentPage: pagination.pageIndex,
+        totalPages: productData.totalPages,
+      });
     };
 
     if (sorting?.length > 0) {
@@ -197,9 +235,11 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
   }, [pagination, sorting]);
 
   //Handle checkbox
-  const handleCheckBox = async (e: ChangeEvent<HTMLInputElement>, row: Product) => {
-
-    let productData:ProductData;
+  const handleCheckBox = async (
+    e: ChangeEvent<HTMLInputElement>,
+    row: Product
+  ) => {
+    let productData: ProductData;
     if (e.target.checked == true) {
       //outOfStock(row);
       productData = await setOutOfStock(row.id);
@@ -207,9 +247,15 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
       //inStock(row);
       productData = await setInStock(row.id);
     }
-     productList?.[1](productData.pageList);
-     paginationRow?.[1](productData.pageSize);
-     productCategory?.[1](productData.categories);
+    console.log(productData);
+    productList?.[1](productData.pageList);
+    paginationRow?.[1]({
+      pageSize: productData.pageSize,
+      totalItems: productData.totalItems,
+      currentPage: pagination.pageIndex,
+      totalPages: productData.totalPages,
+    });
+    productCategory?.[1](productData.categories);
   };
 
   //Edit modal functions
@@ -230,22 +276,32 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
 
   // Update product
   const onSubmit = handleSubmit(async (data) => {
-    if(selectedId){
-      const productData = await updateProduct(data,selectedId)
+    if (selectedId) {
+      const productData = await updateProduct(data, selectedId);
       productList?.[1](productData.pageList);
-      paginationRow?.[1](productData.pageSize);
+      paginationRow?.[1]({
+        pageSize: productData.pageSize,
+        totalItems: productData.totalItems,
+        currentPage: pagination.pageIndex,
+        totalPages: productData.totalPages,
+      });
       productCategory?.[1](productData.categories);
       closeModal();
-    }else{
+    } else {
       throw Error;
-    };
+    }
   });
 
   //Delete product
   const handleDelete = async (row: Product) => {
     const productData = await deleteProduct(row.id);
     productList?.[1](productData.pageList);
-    paginationRow?.[1](productData.pageSize);
+    paginationRow?.[1]({
+      pageSize: productData.pageSize,
+      totalItems: productData.totalItems,
+      currentPage: pagination.pageIndex,
+      totalPages: productData.totalPages,
+    });
     productCategory?.[1](productData.categories);
   };
 
@@ -256,7 +312,7 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
     let bg_color = "";
 
     if (expDate != null) {
-      const diffTime = expDate.getTime()- actualDate.getTime();
+      const diffTime = expDate.getTime() - actualDate.getTime();
       const diffDays = diffTime / (1000 * 3600 * 24);
 
       if (diffDays <= 7) {
@@ -446,7 +502,6 @@ const TableComponent: FunctionComponent<TableComponentProps> =({data})=>{
       </Modal>
     </div>
   );
-}
-
+};
 
 export default TableComponent;

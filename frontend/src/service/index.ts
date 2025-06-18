@@ -31,24 +31,29 @@ export const getProducts = ({
   return fetch(url)
     .then((response) => response.json())
     .then((res) => {
-      if(res != undefined){
+      if (res != undefined) {
         const categories: string[] = Array.from(
           new Set(
-            res.source.map((product: { category: Product }) => product.category)
+            res.content.map(
+              (product: { category: Product }) => product.category
+            )
           )
         );
         const data: ProductData = {
-          pageList: res.pageList,
-          pageSize: res.pageCount,
+          pageList: res.content,
+          totalPages: res.totalPages,
+          pageSize: res.pageable.pageSize,
+          totalItems: res.totalElements,
           categories: categories,
         };
-  
         return data;
-      }else{
+      } else {
         const dataEmpy: ProductData = {
           pageList: [],
+          totalPages: 0,
           pageSize: 0,
-          categories: []
+          totalItems: 0,
+          categories: [],
         };
         return dataEmpy;
       }
@@ -60,7 +65,7 @@ export const getMetrics = () => {
 
   return fetch(url)
     .then((res) => {
-      return res.json(); 
+      return res.json();
     })
     .then((res: Metrics[]) => {
       const data: Metrics[] = res;
@@ -72,19 +77,18 @@ export const getMetrics = () => {
     });
 };
 
-export const addProduct = (data: any) => {
+export const addProduct = async (data: any) => {
   const url = new URL(`${API_URL}/addProduct`);
 
-  return fetch(url, {
+  const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
-  }).then((res) => {
-    if(res.status == 200){
-      const productData = getProducts({});
-      return productData;
-    }
   });
+  if (res.status == 201) {
+    const productData = await getProducts({});
+    return productData;
+  }
 };
 
 export const setOutOfStock = (id: string) => {
@@ -101,7 +105,6 @@ export const setOutOfStock = (id: string) => {
 
 export const setInStock = (id: string) => {
   const url = new URL(`${API_URL}/products/${id}/instock`);
-  console.log(url.toString());
 
   return fetch(url, {
     method: "PUT",
@@ -113,37 +116,35 @@ export const setInStock = (id: string) => {
   });
 };
 
-export const updateProduct = (data:any, id:string) =>{
-    const url = new URL(`${API_URL}/update`);
+export const updateProduct = (data: any, id: string) => {
+  const url = new URL(`${API_URL}/update`);
 
-    if(id) url.searchParams.append("id",id);
-    else throw Error;
+  if (id) url.searchParams.append("id", id);
+  else throw Error;
 
-    return fetch(url, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    }).then(()=> {
-        const productData = getProducts({});
-        return productData;
-    })
+  return fetch(url, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  }).then(() => {
+    const productData = getProducts({});
+    return productData;
+  });
+};
 
-
-}
-
-export const deleteProduct = (id:string)=>{
+export const deleteProduct = (id: string) => {
   const url = new URL(`${API_URL}`);
 
-  url.searchParams.append("id",id);
-  
+  url.searchParams.append("id", id);
+
   return fetch(url, {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
-  }).then(()=>{
+  }).then(() => {
     const productData = getProducts({});
     return productData;
-  })
-}
+  });
+};
 
 export const addProducts = () => {
   const url = new URL(`${API_URL}/addProducts`);
@@ -160,12 +161,13 @@ export const addProducts = () => {
   });
 };
 
-export const validateExpirationDate = (value:any) => {
+export const validateExpirationDate = (value: any) => {
   if (!value) return true;
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const selectedDate = new Date(value);
-    return (
-      selectedDate >= (tomorrow || null) || "Please select a date starting from tomorrow."
-    );
-  };
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const selectedDate = new Date(value);
+  return (
+    selectedDate >= (tomorrow || null) ||
+    "Please select a date starting from tomorrow."
+  );
+};

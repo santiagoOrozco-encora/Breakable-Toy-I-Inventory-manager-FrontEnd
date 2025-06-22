@@ -15,7 +15,12 @@ vi.mock("../../service", () => ({
 
 describe("SearchBox component",()=>{
   const mockCategories:ProductCategoryContextType = [["Electronics", "Groceries", "Clothing"],vi.fn()];
-  const mockPagination: PaginationContextType = [1, vi.fn()]; // current page 1
+  const mockPagination: PaginationContextType = [{
+    pageSize: 10,
+    totalItems: 100,
+    currentPage: 1,
+    totalPages: 10
+  }, vi.fn()];
   const mockProductList: ProductListContextType = [[], vi.fn()];
 
   it("renders SearchBox correctly", () => {
@@ -55,7 +60,7 @@ describe("SearchBox component",()=>{
       categories: ["Electronics", "Groceries", "Clothing"],
     };
 
-    (getProducts as vi.Mock).mockResolvedValue(mockResponse);
+    (getProducts as ReturnType<typeof vi.fn>).mockResolvedValue(mockResponse);
     render(
       <ProductCategoryContext.Provider value={mockCategories}>
         <PaginationContext.Provider value={mockPagination}>

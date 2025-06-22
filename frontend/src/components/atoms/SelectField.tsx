@@ -9,7 +9,7 @@ interface SelectFieldProps extends HTMLProps<HTMLSelectElement> {
 const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(
   ({ optionName, options, children, label, ...rest }, ref) => {
     return (
-      <div className="flex flex-col gap-1 items-start w-full">
+      <div className="flex flex-col items-start w-full border border-gray-300 rounded-md p-2 text-sm text-gray-500 focus:ring-blue-500 focus:border-blue-500 h-[40px] text-bottom">
         <label
           className="font-medium text-sm text-gray-700"
           htmlFor={optionName + "_select"}
@@ -17,12 +17,14 @@ const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(
           {label}
         </label>
         <select
-          className="w-full border-b p-2 gap-0 text-base text-gray-500"
+          className="w-full"
           id={optionName + "_select"}
           ref={ref}
           {...rest}
         >
-          <option value="" key="default">Select an option</option>
+          <option value="" key="default">
+            Select an option
+          </option>
           {options ? (
             options.map((opt) => (
               <option key={opt} value={opt}>

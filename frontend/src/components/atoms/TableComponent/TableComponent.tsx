@@ -79,15 +79,16 @@ const TableComponent: FunctionComponent<TableComponentProps> = ({ data }) => {
       {
         id: "select",
         cell: ({ row }) => (
-          <div>
+          <div className="flex items-center justify-center h-full">
             <input
               type="checkbox"
-              className="w-full h-full"
+              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
               onChange={(e) => handleCheckBox(e, row.original)}
             />
           </div>
         ),
         enableSorting: false,
+        size: 40,
       },
       {
         header: "Category",
@@ -98,14 +99,19 @@ const TableComponent: FunctionComponent<TableComponentProps> = ({ data }) => {
         header: "Price",
         accessorKey: "unitPrice",
         sortingFn: "basic",
+        cell: ({ row }) => {
+          return <div>${row.original.unitPrice}</div>;
+        },
       },
       {
-        header: "Expiration Date",
+        header: "Expiration",
         accessorKey: "expirationDate",
         cell: ({ row }) => {
           if (!row.original.expirationDate) return <div></div>;
           const productDate = new Date(row.original.expirationDate);
-          return <div>{productDate.toLocaleDateString()}</div>;
+          return (
+            <div className="text-sm">{productDate.toLocaleDateString()}</div>
+          );
         },
         sortingFn: "datetime",
       },
@@ -115,27 +121,27 @@ const TableComponent: FunctionComponent<TableComponentProps> = ({ data }) => {
         cell: ({ row }) => {
           if (row.original.stock < 5 && row.original.stock > 0) {
             return (
-              <div className="bg-red-400 text-white h-full w-full">
+              <div className="bg-red-400 text-white h-full w-full text-center rounded-md">
                 {row.original.stock}
               </div>
             );
           }
           if (row.original.stock <= 10 && row.original.stock >= 5) {
             return (
-              <div className="bg-orange-400 text-white h-full w-full">
+              <div className="bg-orange-400 text-white h-full w-full text-center rounded-md">
                 {row.original.stock}
               </div>
             );
           }
           if (row.original.stock <= 0) {
             return (
-              <div className="bg-transparent h-full w-full line-through">
+              <div className="bg-transparent h-full w-full text-center line-through rounded-md">
                 {row.original.stock}
               </div>
             );
           } else {
             return (
-              <div className="bg-transparent h-full w-full ">
+              <div className="bg-transparent h-full w-full text-center rounded-md">
                 {row.original.stock}
               </div>
             );
@@ -144,8 +150,7 @@ const TableComponent: FunctionComponent<TableComponentProps> = ({ data }) => {
         sortingFn: "basic",
       },
       {
-        header: "Actions",
-        accessorKey: "",
+        id: "actions",
         cell: ({ row }) => (
           <div className="w-full gap-2 flex justify-center m-2">
             <Button variant={"primary"} onClick={() => openModal(row.original)}>
@@ -294,7 +299,10 @@ const TableComponent: FunctionComponent<TableComponentProps> = ({ data }) => {
 
   //Delete product
   const handleDelete = async (row: Product) => {
-    const productData = await deleteProduct(row.id);
+    const productData = await deleteProduct(
+      row.id,
+      table.getState().pagination.pageIndex
+    );
     productList?.[1](productData.pageList);
     paginationRow?.[1]({
       pageSize: productData.pageSize,
@@ -327,23 +335,121 @@ const TableComponent: FunctionComponent<TableComponentProps> = ({ data }) => {
     return bg_color;
   };
 
-  //Component
+  // Component return
   return (
-    <div className="w-full gap-3 flex flex-col">
-      <table className="w-full border">
-        <thead className="border-b bg-gray-200 p-3">
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} className="">
-              {headerGroup.headers.map((header) => {
-                return (
-                  <th key={header.id} colSpan={header.colSpan}>
+    <div className="w-full flex flex-col bg-white rounded-lg shadow">
+      {/* Pagination */}
+      <div className="bg-white px-4 py-2 flex items-center justify-between border-b border-gray-200 sm:px-6">
+        <div className="flex-1 flex justify-between sm:hidden">
+          <button
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          >
+            Next
+          </button>
+        </div>
+        <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm text-gray-700">
+              Showing{" "}
+              <span className="font-medium">
+                {table.getState().pagination.pageIndex *
+                  table.getState().pagination.pageSize +
+                  1}
+              </span>{" "}
+              to{" "}
+              <span className="font-medium">
+                {Math.min(
+                  (table.getState().pagination.pageIndex + 1) *
+                    table.getState().pagination.pageSize,
+                  table.getPrePaginationRowModel().rows.length
+                ) +
+                  table.getState().pagination.pageIndex *
+                    table.getState().pagination.pageSize}
+              </span>{" "}
+              of{" "}
+              <span className="font-medium">
+                {table.getPrePaginationRowModel().rows.length}
+              </span>{" "}
+              results
+            </p>
+          </div>
+          <div>
+            <nav
+              className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+              aria-label="Pagination"
+            >
+              <button
+                onClick={() => table.firstPage()}
+                disabled={!table.getCanPreviousPage()}
+                className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              >
+                <span className="sr-only">First</span>«
+              </button>
+              <button
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+                className="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              >
+                <span className="sr-only">Previous</span>‹
+              </button>
+              <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                Page {table.getState().pagination.pageIndex + 1} of{" "}
+                {table.getPageCount()}
+              </span>
+              <button
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+                className="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              >
+                <span className="sr-only">Next</span>›
+              </button>
+              <button
+                onClick={() => table.lastPage()}
+                disabled={!table.getCanNextPage()}
+                className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              >
+                <span className="sr-only">Last</span>»
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+      <div className="w-full overflow-visible">
+        <table className="w-full divide-y divide-gray-200 table-fixed">
+          <colgroup>
+            <col className="w-16" />
+            <col className="w-1/6" />
+            <col className="w-1/3" />
+            <col className="w-24" />
+            <col className="w-32" />
+            <col className="w-24" />
+            <col className="w-36" />
+          </colgroup>
+          <thead className="bg-gray-50">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    colSpan={header.colSpan}
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
                     {header.isPlaceholder ? null : (
                       <div
-                        className={
+                        className={`flex items-center gap-1.5 ${
                           header.column.getCanSort()
-                            ? "cursor-pointer select-none flex gap-1.5 items-center justify-center"
+                            ? "cursor-pointer select-none hover:text-gray-700 transition-colors"
                             : ""
-                        }
+                        }`}
                         onClick={header.column.getToggleSortingHandler()}
                         title={
                           header.column.getCanSort()
@@ -359,147 +465,111 @@ const TableComponent: FunctionComponent<TableComponentProps> = ({ data }) => {
                           header.column.columnDef.header,
                           header.getContext()
                         )}
-                        {{
-                          asc: " 🔼",
-                          desc: " 🔽",
-                        }[header.column.getIsSorted() as string] ?? null}
+                        {header.column.getCanSort() && (
+                          <span className="inline-block ml-1">
+                            {{
+                              asc: "↑",
+                              desc: "↓",
+                            }[header.column.getIsSorted() as string] ?? "↕"}
+                          </span>
+                        )}
                       </div>
                     )}
                   </th>
-                );
-              })}
-            </tr>
-          ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.map((row) => {
-            const bg_color = getRowBackgroundColor(row.original.expirationDate);
-
-            return (
-              <tr key={row.id} className={`border-b ${bg_color}`}>
-                {row.getVisibleCells().map((cell) => {
-                  return (
-                    <td key={cell.id} className="text-center">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  );
-                })}
+                ))}
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
-      <div className="flex flex-col gap-2 items-center">
-        <div className="flex items-center justify-center text-2xl gap-4">
-          <Button
-            //   disabled={!table.getCanPreviousPage()}
-            className="border rounded p-1"
-            onClick={() => table.firstPage()}
-            variant="alt"
-          >
-            {"<<"}
-          </Button>
-          <Button
-            className="border rounded p-1"
-            onClick={() => table.previousPage()}
-            variant="alt"
-            //disabled={!table.getCanPreviousPage()}
-          >
-            {"<"}
-          </Button>
-          <Button
-            className="border rounded p-1"
-            onClick={() => table.nextPage()}
-            variant={"alt"}
-            //disabled={!table.getCanNextPage()}
-          >
-            {">"}
-          </Button>
-          <Button
-            className="border rounded p-1"
-            onClick={() => table.lastPage()}
-            variant="alt"
-            //disabled={!table.getCanNextPage()}
-          >
-            {">>"}
-          </Button>
-        </div>
-        <span className="flex items-center gap-1">
-          <div>Page</div>
-          <strong>
-            {table.getState().pagination.pageIndex + 1} of{" "}
-            {table.getPageCount().toLocaleString()}
-          </strong>
-        </span>
+            ))}
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {table.getRowModel().rows.map((row) => (
+              <tr
+                key={row.id}
+                className={`transition-colors ${getRowBackgroundColor(
+                  row.original.expirationDate
+                )}`}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <td
+                    key={cell.id}
+                    className={`px-6 py-4 text-sm ${
+                      cell.column.id === "name"
+                        ? "font-medium text-gray-900 truncate"
+                        : "text-gray-500 truncate"
+                    }`}
+                    title={String(cell.getValue())}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {/* Edit product modal */}
+        <Modal
+          isOpen={showModal}
+          onRequestClose={closeModal}
+          contentLabel="Add product"
+          style={customStyles}
+          ariaHideApp={false}
+        >
+          <div className="gap-3 flex flex-col">
+            <h3 className="text-xl font-semibold">Edit product</h3>
+            <form onSubmit={onSubmit} className="gap-2.5 flex flex-col ">
+              <InputField
+                {...register("name", { required: true, max: 120 })}
+                type={"text"}
+                field={"productName"}
+                placeholder={"Milk, Beef, ..."}
+                label={"Product name"}
+              />
+              <SelectField
+                {...register("category", { required: true })}
+                optionName={"category"}
+                options={productCategory?.[0]}
+                label={"Product category"}
+              ></SelectField>
+              <InputField
+                {...register("stock", { required: true })}
+                type={"number"}
+                field={"stock"}
+                placeholder={"5"}
+                label={"Product stock"}
+              />
+              <InputField
+                {...register("unitPrice", { required: true })}
+                type={"decimal"}
+                field={"price"}
+                placeholder={"$32.5"}
+                label={"Product price"}
+              />
+              <InputField
+                {...register("expirationDate", {
+                  required: false,
+                  validate: validateExpirationDate,
+                })}
+                type={"date"}
+                field={"expirationDate"}
+                placeholder={"25-05-2025"}
+                label={"Expiration date"}
+              />
+              {errors.expirationDate && (
+                <p style={{ color: "red" }}>
+                  {(errors.expirationDate as FieldError).message}
+                </p>
+              )}
+              <div className="flex justify-end gap-3">
+                <Button variant={"secondary"} onClick={closeModal}>
+                  Cancel
+                </Button>
+                <Button variant={"primary"} typeof="submit">
+                  Update product
+                </Button>
+              </div>
+            </form>
+          </div>
+        </Modal>
       </div>
-
-      {/* Edit product modal */}
-      <Modal
-        isOpen={showModal}
-        onRequestClose={closeModal}
-        contentLabel="Add product"
-        style={customStyles}
-        ariaHideApp={false}
-      >
-        <div className="gap-3 flex flex-col">
-          <h3 className="text-xl font-semibold">Edit product</h3>
-          <form onSubmit={onSubmit} className="gap-2.5 flex flex-col ">
-            <InputField
-              {...register("name", { required: true, max: 120 })}
-              type={"text"}
-              field={"productName"}
-              placeholder={"Milk, Beef, ..."}
-              label={"Product name"}
-            />
-            <SelectField
-              {...register("category", { required: true })}
-              optionName={"category"}
-              options={productCategory?.[0]}
-              label={"Product category"}
-            ></SelectField>
-            <InputField
-              {...register("stock", { required: true })}
-              type={"number"}
-              field={"stock"}
-              placeholder={"5"}
-              label={"Product stock"}
-            />
-            <InputField
-              {...register("unitPrice", { required: true })}
-              type={"decimal"}
-              field={"price"}
-              placeholder={"$32.5"}
-              label={"Product price"}
-            />
-            <InputField
-              {...register("expirationDate", {
-                required: false,
-                validate: validateExpirationDate,
-              })}
-              type={"date"}
-              field={"expirationDate"}
-              placeholder={"25-05-2025"}
-              label={"Expiration date"}
-            />
-            {errors.expirationDate && (
-              <p style={{ color: "red" }}>
-                {(errors.expirationDate as FieldError).message}
-              </p>
-            )}
-            <div className="flex justify-end gap-3">
-              <Button variant={"secondary"} onClick={closeModal}>
-                Cancel
-              </Button>
-              <Button variant={"primary"} typeof="submit">
-                Update product
-              </Button>
-            </div>
-          </form>
-        </div>
-      </Modal>
     </div>
   );
 };

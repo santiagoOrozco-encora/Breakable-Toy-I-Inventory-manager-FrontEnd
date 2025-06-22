@@ -71,7 +71,7 @@ function ProductManager() {
             <header className="w-full m-10 flex flex-col justify-center items-center">
               <Header />
             </header>
-            <main className="w-full m-10 flex flex-col justify-center items-center">
+            <main className="w-full h-2/3 m-10 flex flex-col justify-center items-center">
               <TableProducts products={productData || []} />
               <ShowMetrics data={metrics || []} />
             </main>

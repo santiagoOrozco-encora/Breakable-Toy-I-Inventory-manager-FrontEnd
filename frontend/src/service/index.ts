@@ -132,7 +132,7 @@ export const updateProduct = (data: any, id: string) => {
   });
 };
 
-export const deleteProduct = (id: string) => {
+export const deleteProduct = (id: string, page: number) => {
   const url = new URL(`${API_URL}`);
 
   url.searchParams.append("id", id);
@@ -141,7 +141,7 @@ export const deleteProduct = (id: string) => {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
   }).then(() => {
-    const productData = getProducts({});
+    const productData = getProducts({ page: page, size: 10 });
     return productData;
   });
 };

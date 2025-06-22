@@ -34,7 +34,15 @@ describe("Table of products component",()=>{
       ["Electronics", "Groceries", "Clothing"],
       vi.fn(),
     ];
-    const mockPagination: PaginationContextType = [1, vi.fn()];
+    const mockPagination: PaginationContextType = [
+      {
+        pageSize: 10,
+        totalItems: 20,
+        currentPage: 1,
+        totalPages: 2,
+      },
+      vi.fn()
+    ];
     const mockProductList: ProductListContextType = [mockProducts, vi.fn()];
 
     it("render TableComponent",()=>{
